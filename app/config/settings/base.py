@@ -89,6 +89,12 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 DEFAULT_FROM_EMAIL = "Vaulta <no-reply@vaulta.local>"
 
+# INTENTIONAL LAB BEHAVIOR (AUTH-06): JavaScript can read the session cookie
+# and local HTTP permits it without Secure. Never use these values in production.
+SESSION_COOKIE_HTTPONLY = False
+SESSION_COOKIE_SECURE = False
+SESSION_COOKIE_SAMESITE = "Lax"
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.SessionAuthentication",

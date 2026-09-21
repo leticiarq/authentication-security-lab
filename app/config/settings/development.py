@@ -18,8 +18,4 @@ DATABASES = {
     }
 }
 
-# Phase 1 intentionally keeps Django's secure defaults. Deliberate lab overrides are
-# introduced only with the feature that requires them and are catalogued in the threat model.
-SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SAMESITE = "Lax"

@@ -1,5 +1,7 @@
 from django.contrib.auth import get_user_model, login
 
+from .services import register_authenticated_session
+
 
 REMEMBER_COOKIE_NAME = "vaulta_remember"
 
@@ -23,4 +25,5 @@ class RememberMeMiddleware:
                     # Never use this remember-me design in production.
                     login(request, user, backend="django.contrib.auth.backends.ModelBackend")
                     request.remembered_by_cookie = True
+                    register_authenticated_session(request, user)
         return self.get_response(request)

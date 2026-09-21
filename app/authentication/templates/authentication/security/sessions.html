@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Sessões e dispositivos — Vaulta{% endblock %}
+
+{% block content %}
+<section class="workspace-page security-page">
+    <div class="container security-container">
+        <div class="workspace-header">
+            <div><span class="eyebrow">Segurança da conta</span><h1>Sessões e dispositivos</h1><p>Revise onde sua conta está conectada.</p></div>
+            <a class="text-link" href="{% url 'authentication:dashboard' %}">← Voltar ao painel</a>
+        </div>
+        <nav class="security-tabs"><a class="active" href="{% url 'authentication:sessions' %}">Sessões</a><a href="{% url 'authentication:login-history' %}">Histórico de login</a></nav>
+        <div class="panel security-panel">
+            <div class="panel-title"><div><h2>Sessões ativas</h2><p>Acessos recentes associados à sua conta.</p></div>
+                <form method="post" action="{% url 'authentication:revoke-other-sessions' %}">{% csrf_token %}<button class="outline-button" type="submit">Encerrar outras sessões</button></form>
+            </div>
+            <div class="session-list">
+                {% for item in sessions %}
+                <div class="session-row">
+                    <span class="device-icon">▣</span>
+                    <div><strong>{{ item.device.name|default:'Navegador desconhecido' }}{% if item.django_session_key == current_session_key %} <em>Esta sessão</em>{% endif %}</strong><small>{{ item.created_ip|default:'IP local' }} · iniciada em {{ item.created_at|date:'d/m/Y H:i' }}</small></div>
+                    <span class="last-seen">Visto {{ item.last_seen_at|timesince }} atrás</span>
+                    <form method="post" action="{% url 'authentication:revoke-session' item.id %}">{% csrf_token %}<button class="danger-outline" type="submit">Encerrar</button></form>
+                </div>
+                {% empty %}<p>Nenhuma sessão ativa foi registrada.</p>{% endfor %}
+            </div>
+        </div>
+        <div class="panel security-panel device-panel">
+            <div class="panel-title"><div><h2>Dispositivos conectados</h2><p>Navegadores reconhecidos nos seus acessos.</p></div></div>
+            <div class="device-grid">{% for device in devices %}<div><span class="device-icon">◇</span><strong>{{ device.name }}</strong><small>Último acesso {{ device.last_seen_at|date:'d/m/Y H:i' }}</small></div>{% empty %}<p>Nenhum dispositivo registrado.</p>{% endfor %}</div>
+        </div>
+    </div>
+</section>
+{% endblock %}

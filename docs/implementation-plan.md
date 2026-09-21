@@ -46,6 +46,8 @@ Gate: cada fluxo funciona pelo navegador e tem estados/erros coerentes; testes d
 
 ## Fase 4 — Sessões e MFA
 
+Estado: inventário de sessões, dispositivos, histórico e revogação implementados em `feat/session-management`; MFA ainda pendente.
+
 Branches sugeridos: `feat/session-management`, `feat/mfa`.
 
 - sessões, dispositivos, revogação e histórico visível;

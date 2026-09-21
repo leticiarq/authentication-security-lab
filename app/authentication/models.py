@@ -2,6 +2,7 @@ import uuid
 
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 
 
 class LoginAttempt(models.Model):
@@ -53,3 +54,51 @@ class PasswordResetRequest(models.Model):
     @property
     def is_used(self):
         return self.used_at is not None
+
+
+class Device(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="devices",
+    )
+    name = models.CharField(max_length=120)
+    fingerprint = models.CharField(max_length=64)
+    last_seen_at = models.DateTimeField(default=timezone.now)
+    trusted_until = models.DateTimeField(null=True, blank=True)
+    revoked_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ("-last_seen_at",)
+        constraints = [
+            models.UniqueConstraint(
+                fields=("user", "fingerprint"),
+                name="unique_user_device_fingerprint",
+            )
+        ]
+
+
+class LoginSession(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="login_sessions",
+    )
+    device = models.ForeignKey(
+        Device,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="login_sessions",
+    )
+    django_session_key = models.CharField(max_length=40, unique=True)
+    created_ip = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.CharField(max_length=320, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_seen_at = models.DateTimeField(default=timezone.now)
+    revoked_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ("-last_seen_at",)

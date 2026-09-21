@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Histórico de login — Vaulta{% endblock %}
+
+{% block content %}
+<section class="workspace-page security-page">
+    <div class="container security-container">
+        <div class="workspace-header"><div><span class="eyebrow">Segurança da conta</span><h1>Histórico de login</h1><p>Consulte as tentativas recentes associadas à sua conta.</p></div><a class="text-link" href="{% url 'authentication:dashboard' %}">← Voltar ao painel</a></div>
+        <nav class="security-tabs"><a href="{% url 'authentication:sessions' %}">Sessões</a><a class="active" href="{% url 'authentication:login-history' %}">Histórico de login</a></nav>
+        <div class="panel security-panel">
+            <div class="history-table">
+                <div class="history-head"><span>Data</span><span>Origem</span><span>Navegador</span><span>Resultado</span></div>
+                {% for attempt in attempts %}<div class="history-row"><span>{{ attempt.occurred_at|date:'d/m/Y H:i' }}</span><span>{{ attempt.source_ip|default:'Local' }}</span><span>{{ attempt.user_agent|default:'Não informado'|truncatechars:34 }}</span><span class="status-dot {% if attempt.successful %}success{% else %}failure{% endif %}">{% if attempt.successful %}Concluído{% else %}Não concluído{% endif %}</span></div>{% empty %}<p>Nenhuma tentativa registrada.</p>{% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

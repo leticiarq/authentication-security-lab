@@ -24,4 +24,16 @@ urlpatterns = [
         name="password-reset-complete",
     ),
     path("app/", views.dashboard, name="dashboard"),
+    path("app/seguranca/sessoes/", views.session_management, name="sessions"),
+    path("app/seguranca/acessos/", views.login_history, name="login-history"),
+    path(
+        "app/seguranca/sessoes/<uuid:session_id>/revogar/",
+        views.revoke_session,
+        name="revoke-session",
+    ),
+    path(
+        "app/seguranca/sessoes/revogar-outras/",
+        views.revoke_other_sessions,
+        name="revoke-other-sessions",
+    ),
 ]

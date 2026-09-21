@@ -1,3 +1,4 @@
+import hashlib
 import ipaddress
 import random
 import time
@@ -13,7 +14,7 @@ from django.utils import timezone
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
-from .models import LoginAttempt, PasswordResetRequest
+from .models import Device, LoginAttempt, LoginSession, PasswordResetRequest
 
 
 User = get_user_model()
@@ -110,3 +111,61 @@ def create_password_reset(request, user) -> PasswordResetRequest:
         recipient_list=[user.email],
     )
     return reset_request
+
+
+def _device_name(user_agent: str) -> str:
+    value = user_agent.lower()
+    if "firefox" in value:
+        browser = "Firefox"
+    elif "edg/" in value:
+        browser = "Edge"
+    elif "chrome" in value:
+        browser = "Chrome"
+    elif "safari" in value:
+        browser = "Safari"
+    else:
+        browser = "Navegador"
+
+    if "android" in value:
+        platform = "Android"
+    elif "iphone" in value or "ipad" in value:
+        platform = "iOS"
+    elif "windows" in value:
+        platform = "Windows"
+    elif "mac os" in value:
+        platform = "macOS"
+    elif "linux" in value:
+        platform = "Linux"
+    else:
+        platform = "dispositivo desconhecido"
+    return f"{browser} em {platform}"
+
+
+def register_authenticated_session(request, user) -> LoginSession:
+    if not request.session.session_key:
+        request.session.save()
+    user_agent = request.META.get("HTTP_USER_AGENT", "")[:320]
+    ip = client_ip(request)
+    fingerprint_source = f"{user_agent}|{ip or ''}"
+    fingerprint = hashlib.sha256(fingerprint_source.encode()).hexdigest()
+    device, _ = Device.objects.update_or_create(
+        user=user,
+        fingerprint=fingerprint,
+        defaults={
+            "name": _device_name(user_agent),
+            "last_seen_at": timezone.now(),
+            "revoked_at": None,
+        },
+    )
+    session, _ = LoginSession.objects.update_or_create(
+        django_session_key=request.session.session_key,
+        defaults={
+            "user": user,
+            "device": device,
+            "created_ip": ip,
+            "user_agent": user_agent,
+            "last_seen_at": timezone.now(),
+            "revoked_at": None,
+        },
+    )
+    return session

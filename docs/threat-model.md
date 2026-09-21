@@ -20,7 +20,7 @@ Fora de escopo: terceiros reais, engenharia social, indisponibilidade do host, d
 | AUTH-04 | Restrição inadequada de tentativas | login | contador e lockout são mantidos apenas na sessão anônima do navegador, sem estado por conta ou origem no servidor | proteção aparece na UI, mas uma nova sessão reinicia completamente o contador | média |
 | AUTH-05 | Armazenamento inseguro de senha | autenticação de contas legadas | `LegacyCredential` mantém digest SHA-1 rápido e sem salt para um subconjunto exclusivamente fictício; fallback de autenticação suporta a migração incompleta | inspeção autorizada do banco/código na etapa white-box evidencia digests repetíveis | média |
 | AUTH-06 | Cookie de sessão inseguro | configuração de sessão | perfil vulnerável remove `HttpOnly` do cookie de sessão e mantém `Secure=False` para HTTP local | atributos do `Set-Cookie` e painel de armazenamento do navegador | baixa |
-| AUTH-07 | Invalidação imprópria de sessão | alteração de senha e revogação | atualização troca a senha e preserva sessão atual, mas esquece sessões paralelas e tokens remember-me | sessão aberta em outro navegador continua funcional após a ação | baixa |
+| AUTH-07 | Invalidação imprópria de sessão | gerenciamento de sessões | revogação marca apenas o inventário `LoginSession`, sem apagar a linha correspondente de `django_session` ou impor `revoked_at` no middleware | sessão some da lista, mas o outro navegador continua funcional | baixa |
 | AUTH-08 | Session fixation | conclusão do login | serviço multiestágio grava as chaves de autenticação na sessão pré-login para preservar o wizard, sem rotacionar a chave como `django.contrib.auth.login()` faria | identificador de sessão permanece idêntico antes/depois da autenticação | média |
 | AUTH-09 | Recuperação de senha fraca | recuperação de conta | fluxo alternativo de suporte aceita e-mail mais informação financeira estática visível ao próprio tenant como prova suficiente | combinação de dados de baixa entropia permite avançar no fluxo local | média |
 | AUTH-10 | Token de recuperação previsível | reset de senha | token numérico de seis dígitos deriva do UUID e de uma janela de um minuto por `random.Random`, gerador não criptográfico | mesma conta e minuto produzem o mesmo token; espaço de saída é pequeno | média/alta |
@@ -45,6 +45,8 @@ Este registro acompanha código deliberado; não substitui findings de pentest.
 | AUTH-13 | implementado no remember-me | `feat/authentication-flow` | `RememberMeMiddleware` | `IntentionalRememberMeCharacterizationTests` |
 | AUTH-15 | implementado no seed inicial | `feat/authentication-flow` | comando `seed_dev` | `IntentionalDefaultCredentialCharacterizationTests` |
 | AUTH-10 | implementado na recuperação por e-mail | `feat/password-recovery` | `generate_password_reset_token` | `IntentionalPredictableTokenCharacterizationTests` |
+| AUTH-06 | implementado na configuração de sessão | `feat/session-management` | `config.settings.base` | `IntentionalCookieConfigurationCharacterizationTests` |
+| AUTH-07 | implementado na revogação de sessões | `feat/session-management` | `revoke_session` e `revoke_other_sessions` | `IntentionalSessionInvalidationCharacterizationTests` |
 
 Os demais cenários continuam apenas planejados. AUTH-01 está observável tanto no login quanto na solicitação de recuperação. AUTH-03 também se aplica ao formulário de nova senha. O caminho assistido de AUTH-09 permanece pendente até existirem dados organizacionais/financeiros coerentes para sua prova de identidade fraca.
 
@@ -64,7 +66,7 @@ O lockout não deve impedir a coleta mínima dos sinais de enumeração. A seed 
 
 ### AUTH-07 × AUTH-13
 
-Sessões web e tokens persistentes serão entidades diferentes. AUTH-07 mede uma sessão Django já aberta; AUTH-13 mede a credencial remember-me capaz de criar/restaurar sessões. Cada remediação terá armazenamento e testes próprios.
+Sessões web e tokens persistentes são entidades diferentes. AUTH-07 mede uma sessão Django já aberta que foi marcada como revogada no inventário; AUTH-13 mede a credencial remember-me capaz de criar/restaurar sessões. Cada remediação terá armazenamento e testes próprios.
 
 ### AUTH-08 × AUTH-12
 

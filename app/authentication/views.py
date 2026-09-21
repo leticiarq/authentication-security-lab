@@ -1,21 +1,25 @@
 import time
 
-from django.contrib.auth import login, logout
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.encoding import force_str
-from django.utils.http import url_has_allowed_host_and_scheme
-from django.utils.http import urlsafe_base64_decode
+from django.utils.http import url_has_allowed_host_and_scheme, urlsafe_base64_decode
 from django.views.decorators.http import require_POST
 
 from .forms import LoginForm, PasswordRecoveryRequestForm, SetNewPasswordForm
 from .middleware import REMEMBER_COOKIE_NAME
-from .models import LoginAttempt, PasswordResetRequest
-from .services import AuthenticationResult, check_credentials, create_password_reset, record_attempt
+from .models import LoginAttempt, LoginSession, PasswordResetRequest
+from .services import (
+    AuthenticationResult,
+    check_credentials,
+    create_password_reset,
+    record_attempt,
+    register_authenticated_session,
+)
 
 
 FAILURE_LIMIT = 5
@@ -73,6 +77,7 @@ def login_view(request):
                         result.user,
                         backend="django.contrib.auth.backends.ModelBackend",
                     )
+                    register_authenticated_session(request, result.user)
                     response = redirect(next_url)
                     if form.cleaned_data["remember_me"]:
                         request.session.set_expiry(REMEMBER_SECONDS)
@@ -108,6 +113,11 @@ def login_view(request):
 
 @require_POST
 def logout_view(request):
+    if request.user.is_authenticated and request.session.session_key:
+        LoginSession.objects.filter(
+            user=request.user,
+            django_session_key=request.session.session_key,
+        ).update(revoked_at=timezone.now())
     logout(request)
     response = redirect("home")
     response.delete_cookie(REMEMBER_COOKIE_NAME)
@@ -125,6 +135,49 @@ def dashboard(request):
             "organization": membership.organization if membership else None,
         },
     )
+
+
+@login_required
+def session_management(request):
+    sessions = request.user.login_sessions.select_related("device").filter(revoked_at__isnull=True)
+    devices = request.user.devices.filter(revoked_at__isnull=True)
+    return render(
+        request,
+        "authentication/security/sessions.html",
+        {
+            "sessions": sessions,
+            "devices": devices,
+            "current_session_key": request.session.session_key,
+        },
+    )
+
+
+@login_required
+def login_history(request):
+    attempts = request.user.login_attempts.all()[:50]
+    return render(request, "authentication/security/login_history.html", {"attempts": attempts})
+
+
+@require_POST
+@login_required
+def revoke_session(request, session_id):
+    session = get_object_or_404(LoginSession, pk=session_id, user=request.user)
+
+    # INTENTIONAL LAB BEHAVIOR (AUTH-07): revocation only updates Vaulta's
+    # inventory record. The corresponding django_session row is not deleted,
+    # and no middleware enforces revoked_at, so that browser remains logged in.
+    session.revoked_at = timezone.now()
+    session.save(update_fields=["revoked_at"])
+    return redirect("authentication:sessions")
+
+
+@require_POST
+@login_required
+def revoke_other_sessions(request):
+    request.user.login_sessions.exclude(
+        django_session_key=request.session.session_key
+    ).filter(revoked_at__isnull=True).update(revoked_at=timezone.now())
+    return redirect("authentication:sessions")
 
 
 def password_recovery(request):

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import LoginAttempt, PasswordResetRequest
+from .models import Device, LoginAttempt, LoginSession, PasswordResetRequest
 
 
 @admin.register(LoginAttempt)
@@ -38,3 +38,16 @@ class PasswordResetRequestAdmin(admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None):
         return False
+
+
+@admin.register(Device)
+class DeviceAdmin(admin.ModelAdmin):
+    list_display = ("name", "user", "last_seen_at", "trusted_until", "revoked_at")
+    search_fields = ("name", "user__email", "fingerprint")
+
+
+@admin.register(LoginSession)
+class LoginSessionAdmin(admin.ModelAdmin):
+    list_display = ("user", "device", "created_ip", "created_at", "last_seen_at", "revoked_at")
+    list_filter = ("created_at", "revoked_at")
+    search_fields = ("user__email", "django_session_key", "created_ip")
