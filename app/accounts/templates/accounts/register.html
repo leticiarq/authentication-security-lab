@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Criar conta — Vaulta{% endblock %}
+
+{% block content %}
+<section class="auth-shell">
+    <div class="auth-aside">
+        <div class="auth-aside-content">
+            <span class="eyebrow eyebrow-light">Comece com clareza</span>
+            <h1>Seu financeiro, finalmente em um só lugar.</h1>
+            <p>Crie sua conta e prepare o espaço da sua equipe em poucos minutos.</p>
+            <ul class="benefit-list">
+                <li><span>✓</span> Visão centralizada da operação</li>
+                <li><span>✓</span> Colaboração para toda a equipe</li>
+                <li><span>✓</span> Histórico fácil de acompanhar</li>
+            </ul>
+        </div>
+    </div>
+    <div class="auth-main">
+        <div class="form-card">
+            <div class="form-heading">
+                <span class="eyebrow">Sua conta Vaulta</span>
+                <h2>Vamos começar</h2>
+                <p>Preencha seus dados para criar seu acesso.</p>
+            </div>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="form-alert" role="alert">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                <div class="field">
+                    <label for="{{ form.full_name.id_for_label }}">{{ form.full_name.label }}</label>
+                    {{ form.full_name }}
+                    {% for error in form.full_name.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+                </div>
+                <div class="field">
+                    <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                    {{ form.email }}
+                    {% for error in form.email.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+                </div>
+                <div class="field-row">
+                    <div class="field">
+                        <label for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+                        {{ form.password }}
+                        {% if form.password.help_text %}<small>{{ form.password.help_text }}</small>{% endif %}
+                        {% for error in form.password.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+                    </div>
+                    <div class="field">
+                        <label for="{{ form.password_confirmation.id_for_label }}">{{ form.password_confirmation.label }}</label>
+                        {{ form.password_confirmation }}
+                        {% for error in form.password_confirmation.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+                    </div>
+                </div>
+                <div class="checkbox-field">
+                    {{ form.accept_terms }}
+                    <label for="{{ form.accept_terms.id_for_label }}">Li e aceito os <a href="{% url 'terms' %}" target="_blank">Termos de Uso</a>.</label>
+                </div>
+                {% for error in form.accept_terms.errors %}<span class="field-error checkbox-error">{{ error }}</span>{% endfor %}
+
+                <button class="button button-block" type="submit">Criar minha conta</button>
+            </form>
+            <p class="form-footnote">Já tem uma conta? O acesso estará disponível pelo fluxo de entrada da plataforma.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

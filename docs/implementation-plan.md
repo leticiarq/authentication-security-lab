@@ -4,7 +4,7 @@ O trabalho usa branches de capacidade. Vulnerabilidades entram junto à funciona
 
 ## Fase 1 — Fundação (`feat/project-setup`)
 
-Estado: implementada neste branch.
+Estado: implementada em `feat/project-setup`.
 
 - arquitetura, modelo de dados, endpoints, fluxos e threat model;
 - Django e settings separados;
@@ -17,6 +17,8 @@ Estado: implementada neste branch.
 Não há comportamento vulnerável de autenticação nesta fase.
 
 ## Fase 2 — Contas e organizações
+
+Estado: em andamento; cadastro e verificação local implementados em `feat/user-registration`.
 
 Branches sugeridos: `feat/user-registration`, `feat/organizations`.
 

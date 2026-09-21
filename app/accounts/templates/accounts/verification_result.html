@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Verificação de e-mail — Vaulta{% endblock %}
+
+{% block content %}
+<section class="result-page">
+    <div class="result-card">
+        {% if verification_succeeded %}
+            <span class="result-icon result-success" aria-hidden="true">✓</span>
+            <span class="eyebrow">E-mail confirmado</span>
+            <h1>Conta verificada</h1>
+            <p>Seu endereço foi confirmado. Sua conta está pronta para os próximos passos.</p>
+            <a class="button" href="{% url 'home' %}">Continuar</a>
+        {% else %}
+            <span class="result-icon result-error" aria-hidden="true">!</span>
+            <span class="eyebrow">Não foi possível confirmar</span>
+            <h1>Link indisponível</h1>
+            <p>Este link não é válido. Volte ao cadastro para revisar seus dados.</p>
+            <a class="button" href="{% url 'accounts:register' %}">Voltar ao cadastro</a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

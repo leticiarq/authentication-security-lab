@@ -1,0 +1,9 @@
+Olá, {{ user.get_short_name }}!
+
+Obrigado por criar sua conta na Vaulta. Confirme seu endereço de e-mail acessando o link abaixo:
+
+{{ verification_url }}
+
+Se você não iniciou este cadastro, ignore esta mensagem.
+
+Equipe Vaulta

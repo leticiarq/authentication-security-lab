@@ -4,7 +4,7 @@ Vaulta is a fictional financial-management SaaS built as a local authentication 
 
 > **WARNING: This application is intentionally vulnerable. Run it only in an isolated/local environment. Do not expose it to the Internet.**
 
-The repository is currently in **Phase 1 — project foundation**. It includes the Django skeleton, a custom user model, public product pages, PostgreSQL/Docker configuration, a health check, tests, and the design documents that govern later phases. Authentication flaws are documented internally but are not yet implemented in this phase.
+The project foundation is complete and **Phase 2 — accounts and organizations** is in progress. The current registration flow includes local email verification and the first intentional authentication behavior catalogued in the internal threat model.
 
 ## Quick start with Docker
 

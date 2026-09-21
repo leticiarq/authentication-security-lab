@@ -32,6 +32,16 @@ Fora de escopo: terceiros reais, engenharia social, indisponibilidade do host, d
 
 AUTH-05 terá comentários de código explícitos e próximos ao modelo/backend afirmando que o mecanismo é inseguro, limitado a dados de laboratório e proibido em produção. Esses comentários não serão enviados ao HTML.
 
+## Registro de implementação
+
+Este registro acompanha código deliberado; não substitui findings de pentest.
+
+| ID | Estado | Branch funcional | Localização | Teste de caracterização |
+|---|---|---|---|---|
+| AUTH-03 | implementado no fluxo de cadastro | `feat/user-registration` | `accounts.forms.RegistrationForm` | `IntentionalWeakPasswordPolicyCharacterizationTests` |
+
+Os demais cenários continuam apenas planejados.
+
 ## Conflitos e separação dos cenários
 
 ### AUTH-01 × AUTH-02

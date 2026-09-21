@@ -74,7 +74,7 @@ As URLs públicas usam nomes de produto e não denunciam cenários de laboratór
 | GET | `/` | landing page |
 | GET | `/sobre/`, `/ajuda/`, `/termos/` | conteúdo institucional |
 | GET/POST | `/cadastro/` | criação da conta |
-| GET/POST | `/verificar-email/<token>/` | verificação local de e-mail |
+| GET | `/verificar-email/<uidb64>/<token>/` | verificação local de e-mail |
 | GET/POST | `/entrar/` | primeiro fator e opção remember-me |
 | GET/POST | `/entrar/verificacao/` | desafio MFA |
 | POST | `/sair/` | logout |
