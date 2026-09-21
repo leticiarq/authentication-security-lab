@@ -1,9 +1,19 @@
 import ipaddress
+import random
+import time
 from dataclasses import dataclass
+from datetime import timedelta
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.urls import reverse
+from django.utils import timezone
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
 
-from .models import LoginAttempt
+from .models import LoginAttempt, PasswordResetRequest
 
 
 User = get_user_model()
@@ -61,3 +71,42 @@ def record_attempt(request, email: str, result: AuthenticationResult) -> None:
         successful=result.succeeded,
         reason=result.reason,
     )
+
+
+def generate_password_reset_token(user, timestamp: float | None = None) -> str:
+    """Generate the deliberately weak token used by the vulnerable release.
+
+    INTENTIONAL LAB BEHAVIOR (AUTH-10): random.Random is deterministic and not
+    suitable for credentials. The seed combines a discoverable identifier with
+    a one-minute time bucket, and the output space is only six decimal digits.
+    Production recovery tokens must use a cryptographically secure generator.
+    """
+    current_time = time.time() if timestamp is None else timestamp
+    minute_bucket = int(current_time // 60)
+    generator = random.Random(f"{user.pk}:{minute_bucket}")
+    return str(generator.randrange(100000, 1000000))
+
+
+def create_password_reset(request, user) -> PasswordResetRequest:
+    reset_request = PasswordResetRequest.objects.create(
+        user=user,
+        token=generate_password_reset_token(user),
+        expires_at=timezone.now() + timedelta(minutes=15),
+        requested_ip=client_ip(request),
+    )
+    uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+    path = reverse(
+        "authentication:password-reset",
+        kwargs={"uidb64": uidb64, "token": reset_request.token},
+    )
+    body = render_to_string(
+        "authentication/emails/password_reset.txt",
+        {"user": user, "reset_url": request.build_absolute_uri(path)},
+    )
+    send_mail(
+        subject="Redefina sua senha da Vaulta",
+        message=body,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[user.email],
+    )
+    return reset_request

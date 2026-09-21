@@ -32,7 +32,7 @@ Gate: migrations reproduzíveis, matriz de acesso por papel e cadastro completo 
 
 ## Fase 3 — Autenticação e recuperação
 
-Estado: autenticação primária, histórico, proteção de tentativas, remember-me e conta demo implementados em `feat/authentication-flow`; recuperação ainda pendente.
+Estado: autenticação primária, histórico, proteção de tentativas, remember-me e conta demo implementados em `feat/authentication-flow`; recuperação por e-mail, expiração e redefinição implementadas em `feat/password-recovery`. O caminho assistido de AUTH-09 permanece pendente.
 
 Branches sugeridos: `feat/authentication-flow`, `feat/password-recovery`.
 

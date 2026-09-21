@@ -1,21 +1,27 @@
 import time
 
 from django.contrib.auth import login, logout
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.utils import timezone
+from django.utils.encoding import force_str
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.http import urlsafe_base64_decode
 from django.views.decorators.http import require_POST
 
-from .forms import LoginForm
+from .forms import LoginForm, PasswordRecoveryRequestForm, SetNewPasswordForm
 from .middleware import REMEMBER_COOKIE_NAME
-from .models import LoginAttempt
-from .services import AuthenticationResult, check_credentials, record_attempt
+from .models import LoginAttempt, PasswordResetRequest
+from .services import AuthenticationResult, check_credentials, create_password_reset, record_attempt
 
 
 FAILURE_LIMIT = 5
 LOCK_SECONDS = 60
 REMEMBER_SECONDS = 60 * 60 * 24 * 30
+User = get_user_model()
 
 
 def _safe_next_url(request) -> str:
@@ -111,3 +117,80 @@ def logout_view(request):
 @login_required
 def dashboard(request):
     return render(request, "authentication/dashboard.html")
+
+
+def password_recovery(request):
+    if request.method == "POST":
+        form = PasswordRecoveryRequestForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data["email"]
+            user = User.objects.filter(email=email, is_active=True).first()
+            if user:
+                create_password_reset(request, user)
+                request.session["recovery_email"] = email
+                return redirect("authentication:password-recovery-sent")
+
+            # INTENTIONAL LAB BEHAVIOR (AUTH-01): the recovery flow renders a
+            # field-specific error for an unknown account instead of returning
+            # the same acknowledgement used for an existing account.
+            form.add_error("email", "Não foi possível localizar o acesso informado.")
+    else:
+        form = PasswordRecoveryRequestForm()
+    return render(request, "authentication/password_recovery.html", {"form": form})
+
+
+def password_recovery_sent(request):
+    email = request.session.get("recovery_email")
+    if not email:
+        return redirect("authentication:password-recovery")
+    return render(request, "authentication/password_recovery_sent.html", {"email": email})
+
+
+def _password_reset_request(uidb64, token):
+    try:
+        user_id = force_str(urlsafe_base64_decode(uidb64))
+    except (TypeError, ValueError, OverflowError):
+        return None
+    return (
+        PasswordResetRequest.objects.select_related("user")
+        .filter(
+            user_id=user_id,
+            token=token,
+            used_at__isnull=True,
+            expires_at__gt=timezone.now(),
+        )
+        .first()
+    )
+
+
+def password_reset(request, uidb64, token):
+    reset_request = _password_reset_request(uidb64, token)
+    if not reset_request:
+        return render(request, "authentication/password_reset_invalid.html", status=400)
+
+    if request.method == "POST":
+        form = SetNewPasswordForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                current_reset = PasswordResetRequest.objects.select_for_update().get(
+                    pk=reset_request.pk
+                )
+                if current_reset.used_at or current_reset.expires_at <= timezone.now():
+                    return render(
+                        request,
+                        "authentication/password_reset_invalid.html",
+                        status=400,
+                    )
+                current_reset.user.set_password(form.cleaned_data["password"])
+                current_reset.user.save(update_fields=["password", "updated_at"])
+                current_reset.used_at = timezone.now()
+                current_reset.save(update_fields=["used_at"])
+            return redirect("authentication:password-reset-complete")
+    else:
+        form = SetNewPasswordForm()
+
+    return render(request, "authentication/password_reset.html", {"form": form})
+
+
+def password_reset_complete(request):
+    return render(request, "authentication/password_reset_complete.html")

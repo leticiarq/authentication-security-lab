@@ -79,7 +79,7 @@ As URLs públicas usam nomes de produto e não denunciam cenários de laboratór
 | GET/POST | `/entrar/verificacao/` | desafio MFA |
 | POST | `/sair/` | logout |
 | GET/POST | `/recuperar-acesso/` | início da recuperação |
-| GET/POST | `/redefinir-senha/<token>/` | conclusão da recuperação |
+| GET/POST | `/redefinir-senha/<uidb64>/<token>/` | conclusão da recuperação |
 | GET/POST | `/convites/<token>/` | aceite de convite |
 
 ### Área autenticada

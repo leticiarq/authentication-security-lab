@@ -7,5 +7,21 @@ app_name = "authentication"
 urlpatterns = [
     path("entrar/", views.login_view, name="login"),
     path("sair/", views.logout_view, name="logout"),
+    path("recuperar-acesso/", views.password_recovery, name="password-recovery"),
+    path(
+        "recuperar-acesso/enviado/",
+        views.password_recovery_sent,
+        name="password-recovery-sent",
+    ),
+    path(
+        "redefinir-senha/<uidb64>/<token>/",
+        views.password_reset,
+        name="password-reset",
+    ),
+    path(
+        "redefinir-senha/concluido/",
+        views.password_reset_complete,
+        name="password-reset-complete",
+    ),
     path("app/", views.dashboard, name="dashboard"),
 ]

@@ -24,7 +24,7 @@
             <div class="field">
                 <div class="field-label-row">
                     <label for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
-                    <span>Problemas para acessar?</span>
+                    <a href="{% url 'authentication:password-recovery' %}">Esqueci minha senha</a>
                 </div>
                 {{ form.password }}
                 {% for error in form.password.errors %}<span class="field-error">{{ error }}</span>{% endfor %}

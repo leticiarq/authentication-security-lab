@@ -23,7 +23,7 @@ Fora de escopo: terceiros reais, engenharia social, indisponibilidade do host, d
 | AUTH-07 | Invalidação imprópria de sessão | alteração de senha e revogação | atualização troca a senha e preserva sessão atual, mas esquece sessões paralelas e tokens remember-me | sessão aberta em outro navegador continua funcional após a ação | baixa |
 | AUTH-08 | Session fixation | conclusão do login | serviço multiestágio grava as chaves de autenticação na sessão pré-login para preservar o wizard, sem rotacionar a chave como `django.contrib.auth.login()` faria | identificador de sessão permanece idêntico antes/depois da autenticação | média |
 | AUTH-09 | Recuperação de senha fraca | recuperação de conta | fluxo alternativo de suporte aceita e-mail mais informação financeira estática visível ao próprio tenant como prova suficiente | combinação de dados de baixa entropia permite avançar no fluxo local | média |
-| AUTH-10 | Token de recuperação previsível | reset de senha | token numérico deriva de identificador e janela temporal por gerador pseudoaleatório não criptográfico | tokens emitidos para contas de teste apresentam padrão e espaço pequeno | média/alta |
+| AUTH-10 | Token de recuperação previsível | reset de senha | token numérico de seis dígitos deriva do UUID e de uma janela de um minuto por `random.Random`, gerador não criptográfico | mesma conta e minuto produzem o mesmo token; espaço de saída é pequeno | média/alta |
 | AUTH-11 | Falha de MFA | dispositivo confiável | cookie de dispositivo contém um identificador persistente não assinado; lookup verifica existência, mas não vincula o registro ao usuário pendente | alteração/reuso do cookie muda a exigência do segundo fator | alta |
 | AUTH-12 | Bypass de fluxo de autenticação | aceite de convite multi-stage | etapa final confia em `preauth_user_id` salvo quando o convite é aberto e não exige marcador de primeiro fator concluído | navegação direta e mudanças de estado permitem concluir uma transição incompleta | alta |
 | AUTH-13 | Problema em remember-me | login persistente | cookie contém UUID bruto do usuário, sem assinatura, segredo aleatório, rotação ou registro de revogação | valor é correlacionável, restaura login e permanece válido após troca de senha | média |
@@ -44,8 +44,9 @@ Este registro acompanha código deliberado; não substitui findings de pentest.
 | AUTH-04 | implementado no login | `feat/authentication-flow` | contador em `request.session` | `IntentionalAttemptRestrictionCharacterizationTests` |
 | AUTH-13 | implementado no remember-me | `feat/authentication-flow` | `RememberMeMiddleware` | `IntentionalRememberMeCharacterizationTests` |
 | AUTH-15 | implementado no seed inicial | `feat/authentication-flow` | comando `seed_dev` | `IntentionalDefaultCredentialCharacterizationTests` |
+| AUTH-10 | implementado na recuperação por e-mail | `feat/password-recovery` | `generate_password_reset_token` | `IntentionalPredictableTokenCharacterizationTests` |
 
-Os demais cenários continuam apenas planejados. AUTH-01 está observável no login nesta etapa; a futura recuperação também terá sua própria diferença de resposta, conforme a matriz.
+Os demais cenários continuam apenas planejados. AUTH-01 está observável tanto no login quanto na solicitação de recuperação. AUTH-03 também se aplica ao formulário de nova senha. O caminho assistido de AUTH-09 permanece pendente até existirem dados organizacionais/financeiros coerentes para sua prova de identidade fraca.
 
 ## Conflitos e separação dos cenários
 
