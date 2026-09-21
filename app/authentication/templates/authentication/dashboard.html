@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Visão geral — Vaulta{% endblock %}
+
+{% block content %}
+<section class="app-shell">
+    <aside class="app-sidebar">
+        <div class="workspace-badge"><span>A</span><div><strong>Aurora Studio</strong><small>Plano Essencial</small></div></div>
+        <nav aria-label="Navegação da conta">
+            <a class="active" href="{% url 'authentication:dashboard' %}"><span>⌂</span> Visão geral</a>
+            <a href="#"><span>↕</span> Movimentações</a>
+            <a href="#"><span>▣</span> Contas</a>
+            <a href="#"><span>◫</span> Relatórios</a>
+            <p>Organização</p>
+            <a href="#"><span>♙</span> Equipe</a>
+            <a href="#"><span>⚙</span> Configurações</a>
+        </nav>
+    </aside>
+    <div class="app-content">
+        <header class="app-heading">
+            <div><span class="eyebrow">Segunda-feira, 21 de setembro</span><h1>Olá, {{ user.get_short_name }}</h1><p>Aqui está o resumo da sua operação.</p></div>
+            <div class="profile-chip"><span>{{ user.get_short_name|first|upper }}</span><div><strong>{{ user.get_short_name }}</strong><small>{{ user.email }}</small></div></div>
+        </header>
+        <div class="metric-grid">
+            <article class="metric-card featured"><small>Saldo disponível</small><strong>R$ 184.720,00</strong><span>↗ 12,4% no período</span></article>
+            <article class="metric-card"><small>Receitas no mês</small><strong>R$ 42.850,00</strong><span class="up">↗ 8,2%</span></article>
+            <article class="metric-card"><small>Despesas no mês</small><strong>R$ 19.240,00</strong><span class="down">↘ 3,1%</span></article>
+        </div>
+        <div class="dashboard-grid">
+            <article class="panel cashflow-panel">
+                <div class="panel-title"><div><h2>Fluxo de caixa</h2><p>Entradas e saídas dos últimos meses</p></div><button type="button">6 meses⌄</button></div>
+                <div class="line-chart" aria-label="Gráfico ilustrativo de fluxo de caixa"><span class="chart-line"></span><i style="left: 8%; bottom: 24%"></i><i style="left: 27%; bottom: 43%"></i><i style="left: 47%; bottom: 34%"></i><i style="left: 67%; bottom: 58%"></i><i style="left: 88%; bottom: 72%"></i></div>
+                <div class="chart-labels"><span>Abr</span><span>Mai</span><span>Jun</span><span>Jul</span><span>Ago</span><span>Set</span></div>
+            </article>
+            <article class="panel activity-panel">
+                <div class="panel-title"><div><h2>Atividade recente</h2><p>Últimos lançamentos</p></div><a href="#">Ver todos</a></div>
+                <div class="activity-row"><span class="transaction-icon mint">↙</span><div><strong>Projeto Horizonte</strong><small>Recebimento · hoje</small></div><b class="up">+ R$ 8.400</b></div>
+                <div class="activity-row"><span class="transaction-icon purple">↗</span><div><strong>Infraestrutura Cloud</strong><small>Tecnologia · ontem</small></div><b>− R$ 1.280</b></div>
+                <div class="activity-row"><span class="transaction-icon amber">↗</span><div><strong>Espaço de trabalho</strong><small>Operacional · 18 set</small></div><b>− R$ 3.200</b></div>
+            </article>
+        </div>
+    </div>
+</section>
+{% endblock %}

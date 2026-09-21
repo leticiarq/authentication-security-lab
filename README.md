@@ -4,7 +4,7 @@ Vaulta is a fictional financial-management SaaS built as a local authentication 
 
 > **WARNING: This application is intentionally vulnerable. Run it only in an isolated/local environment. Do not expose it to the Internet.**
 
-The project foundation is complete and **Phase 2 — accounts and organizations** is in progress. The current registration flow includes local email verification and the first intentional authentication behavior catalogued in the internal threat model.
+The project foundation is complete. Registration, local email verification and the primary authentication flow are now available; organizations and password recovery remain in progress. Intentional authentication behaviors are tracked only in the internal threat model and characterization tests.
 
 ## Quick start with Docker
 
@@ -21,6 +21,7 @@ Useful commands:
 
 ```bash
 docker compose exec web python manage.py createsuperuser
+docker compose exec web python manage.py seed_dev
 docker compose exec web python manage.py test ../tests --settings=config.settings.test
 docker compose down
 ```
@@ -35,6 +36,7 @@ See [docs/setup.md](docs/setup.md). PostgreSQL is the normal development databas
 
 - [Architecture](docs/architecture.md)
 - [Setup and operations](docs/setup.md)
+- [Development accounts](docs/development-accounts.md)
 - [Threat model and internal vulnerability matrix](docs/threat-model.md)
 - [Implementation phases](docs/implementation-plan.md)
 - [Vulnerability workspace](vulnerabilities/README.md)

@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "accounts.apps.AccountsConfig",
+    "authentication.apps.AuthenticationConfig",
     "core.apps.CoreConfig",
 ]
 
@@ -35,6 +36,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "authentication.middleware.RememberMeMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -67,8 +69,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AUTH_USER_MODEL = "accounts.User"
-LOGIN_URL = "login"
-LOGIN_REDIRECT_URL = "dashboard"
+LOGIN_URL = "authentication:login"
+LOGIN_REDIRECT_URL = "authentication:dashboard"
 LOGOUT_REDIRECT_URL = "home"
 
 LANGUAGE_CODE = "pt-br"

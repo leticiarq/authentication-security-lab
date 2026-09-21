@@ -17,7 +17,7 @@ Fora de escopo: terceiros reais, engenharia social, indisponibilidade do host, d
 | AUTH-01 | Username enumeration por resposta | login e recuperação | mensagens, status e/ou estrutura de resposta diferem quando o e-mail existe | comparação de respostas para identidades fictícias existentes e ausentes | baixa |
 | AUTH-02 | Username enumeration por tempo | login | consulta antecipada retorna rápido para identidade ausente; existente executa verificação de hash custosa, sem hash fictício equivalente | amostras repetidas mostram distribuições de latência separáveis | média |
 | AUTH-03 | Política fraca de senha | cadastro e alteração | formulários próprios validam apenas tamanho mínimo curto e ignoram validadores configurados no Django | senhas previsíveis são aceitas em mais de um fluxo | baixa |
-| AUTH-04 | Restrição inadequada de tentativas | login | contador/lockout usa como chave um IP obtido de header de proxy não confiável e aplica janela curta apenas ao endpoint principal | proteção aparece na UI, mas tentativas distribuídas por chave controlável continuam | média |
+| AUTH-04 | Restrição inadequada de tentativas | login | contador e lockout são mantidos apenas na sessão anônima do navegador, sem estado por conta ou origem no servidor | proteção aparece na UI, mas uma nova sessão reinicia completamente o contador | média |
 | AUTH-05 | Armazenamento inseguro de senha | autenticação de contas legadas | `LegacyCredential` mantém digest SHA-1 rápido e sem salt para um subconjunto exclusivamente fictício; fallback de autenticação suporta a migração incompleta | inspeção autorizada do banco/código na etapa white-box evidencia digests repetíveis | média |
 | AUTH-06 | Cookie de sessão inseguro | configuração de sessão | perfil vulnerável remove `HttpOnly` do cookie de sessão e mantém `Secure=False` para HTTP local | atributos do `Set-Cookie` e painel de armazenamento do navegador | baixa |
 | AUTH-07 | Invalidação imprópria de sessão | alteração de senha e revogação | atualização troca a senha e preserva sessão atual, mas esquece sessões paralelas e tokens remember-me | sessão aberta em outro navegador continua funcional após a ação | baixa |
@@ -26,7 +26,7 @@ Fora de escopo: terceiros reais, engenharia social, indisponibilidade do host, d
 | AUTH-10 | Token de recuperação previsível | reset de senha | token numérico deriva de identificador e janela temporal por gerador pseudoaleatório não criptográfico | tokens emitidos para contas de teste apresentam padrão e espaço pequeno | média/alta |
 | AUTH-11 | Falha de MFA | dispositivo confiável | cookie de dispositivo contém um identificador persistente não assinado; lookup verifica existência, mas não vincula o registro ao usuário pendente | alteração/reuso do cookie muda a exigência do segundo fator | alta |
 | AUTH-12 | Bypass de fluxo de autenticação | aceite de convite multi-stage | etapa final confia em `preauth_user_id` salvo quando o convite é aberto e não exige marcador de primeiro fator concluído | navegação direta e mudanças de estado permitem concluir uma transição incompleta | alta |
-| AUTH-13 | Problema em remember-me | login persistente | token determinístico, não rotacionado e não revogado por troca de senha; valor fica diretamente associado ao usuário | cookie pode ser correlacionado e permanece válido após eventos de segurança | média |
+| AUTH-13 | Problema em remember-me | login persistente | cookie contém UUID bruto do usuário, sem assinatura, segredo aleatório, rotação ou registro de revogação | valor é correlacionável, restaura login e permanece válido após troca de senha | média |
 | AUTH-14 | Exposição de credencial | telemetria de suporte local | middleware diagnóstico serializa payload de POST de autenticação sem redigir campos sensíveis em arquivo local incluído em bundle de suporte acessível a system admin | credenciais fictícias aparecem em logs/bundle dentro da instalação | média |
 | AUTH-15 | Credenciais padrão/demo | bootstrap de desenvolvimento | seed cria workspace de demonstração com senha documentada e conta habilitada com acesso regular | credencial publicada na documentação de desenvolvimento autentica sem troca obrigatória | baixa |
 
@@ -39,8 +39,13 @@ Este registro acompanha código deliberado; não substitui findings de pentest.
 | ID | Estado | Branch funcional | Localização | Teste de caracterização |
 |---|---|---|---|---|
 | AUTH-03 | implementado no fluxo de cadastro | `feat/user-registration` | `accounts.forms.RegistrationForm` | `IntentionalWeakPasswordPolicyCharacterizationTests` |
+| AUTH-01 | implementado no login | `feat/authentication-flow` | `authentication.services.check_credentials` e `login_view` | `IntentionalEnumerationCharacterizationTests` |
+| AUTH-02 | implementado no login | `feat/authentication-flow` | retorno antecipado em `check_credentials` | `test_unknown_account_skips_password_hash_work` |
+| AUTH-04 | implementado no login | `feat/authentication-flow` | contador em `request.session` | `IntentionalAttemptRestrictionCharacterizationTests` |
+| AUTH-13 | implementado no remember-me | `feat/authentication-flow` | `RememberMeMiddleware` | `IntentionalRememberMeCharacterizationTests` |
+| AUTH-15 | implementado no seed inicial | `feat/authentication-flow` | comando `seed_dev` | `IntentionalDefaultCredentialCharacterizationTests` |
 
-Os demais cenários continuam apenas planejados.
+Os demais cenários continuam apenas planejados. AUTH-01 está observável no login nesta etapa; a futura recuperação também terá sua própria diferença de resposta, conforme a matriz.
 
 ## Conflitos e separação dos cenários
 
@@ -54,7 +59,7 @@ Política de criação não é o mesmo que armazenamento. Usuários normais cont
 
 ### AUTH-04 × AUTH-01/AUTH-02
 
-O lockout não deve impedir a coleta mínima dos sinais de enumeração. A seed fornecerá várias identidades e os testes resetarão apenas dados locais. A fragilidade do rate limit estará na confiança do identificador de origem, não na ausência total de uma proteção aparente.
+O lockout não deve impedir a coleta mínima dos sinais de enumeração. A seed fornecerá várias identidades e os testes usarão clientes locais independentes. A fragilidade está em guardar o contador somente na sessão anônima, não na ausência total de uma proteção aparente.
 
 ### AUTH-07 × AUTH-13
 

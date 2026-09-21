@@ -24,7 +24,16 @@
                 <a href="{% url 'home' %}#recursos">Produto</a>
                 <a href="{% url 'about' %}">Sobre</a>
                 <a href="{% url 'help' %}">Ajuda</a>
-                <a class="button button-small" href="{% url 'accounts:register' %}">Criar conta</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'authentication:dashboard' %}">Painel</a>
+                    <form method="post" action="{% url 'authentication:logout' %}" class="nav-form">
+                        {% csrf_token %}
+                        <button class="nav-action" type="submit">Sair</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'authentication:login' %}">Entrar</a>
+                    <a class="button button-small" href="{% url 'accounts:register' %}">Criar conta</a>
+                {% endif %}
             </div>
         </nav>
     </header>

@@ -8,6 +8,8 @@
 4. Verifique o processo em `http://127.0.0.1:8000/health/`.
 5. Encerre com `docker compose down`.
 
+Para criar a conta fictícia inicial, execute `docker compose exec web python manage.py seed_dev`. As credenciais locais ficam em `docs/development-accounts.md`.
+
 O container web executa migrations antes do servidor de desenvolvimento. O volume `postgres_data` preserva o banco entre reinicializações. Use `docker compose down -v` somente quando quiser apagar deliberadamente todos os dados locais do laboratório.
 
 Por padrão:
