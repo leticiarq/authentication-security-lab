@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Vaulta — sua operação financeira em foco{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="container hero-grid">
+        <div class="hero-copy">
+            <span class="eyebrow">Controle que acompanha seu ritmo</span>
+            <h1>Finanças organizadas. Decisões mais leves.</h1>
+            <p class="lead">Centralize contas, acompanhe o caixa e dê visibilidade ao seu time em um espaço pensado para empresas que estão crescendo.</p>
+            <div class="hero-actions">
+                <a class="button" href="#recursos">Conheça a plataforma</a>
+                <a class="text-link" href="{% url 'about' %}">Por que a Vaulta <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="trust-row">
+                <span><strong>4,9</strong> satisfação média</span>
+                <span><strong>24 h</strong> de visão de caixa</span>
+                <span><strong>1 lugar</strong> para todo o time</span>
+            </div>
+        </div>
+        <div class="dashboard-preview" aria-label="Prévia do painel financeiro">
+            <div class="preview-top"><span>Visão geral</span><span class="period">Este mês⌄</span></div>
+            <div class="balance-card">
+                <small>Saldo consolidado</small>
+                <strong>R$ 184.720,00</strong>
+                <span class="positive">↗ 12,4% este mês</span>
+            </div>
+            <div class="chart-card">
+                <div class="chart-heading"><span>Fluxo de caixa</span><small>últimos 6 meses</small></div>
+                <div class="chart" aria-hidden="true">
+                    <span style="height: 40%"></span><span style="height: 58%"></span>
+                    <span style="height: 48%"></span><span style="height: 72%"></span>
+                    <span style="height: 64%"></span><span style="height: 88%"></span>
+                </div>
+            </div>
+            <div class="preview-list">
+                <div><span class="transaction-icon purple">↗</span><span><strong>Recebimentos</strong><small>18 lançamentos</small></span><b>R$ 42.850</b></div>
+                <div><span class="transaction-icon mint">↘</span><span><strong>Pagamentos</strong><small>31 lançamentos</small></span><b>R$ 19.240</b></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="logos" aria-label="Empresas que usam a Vaulta">
+    <div class="container"><span>NORTHSTAR</span><span>FLORA</span><span>VÉRTICE</span><span>ORBITAL</span><span>MONO</span></div>
+</section>
+
+<section class="section" id="recursos">
+    <div class="container">
+        <div class="section-heading">
+            <span class="eyebrow">Tudo conectado</span>
+            <h2>Uma visão clara da sua operação</h2>
+            <p>Menos planilhas espalhadas, mais contexto para decidir.</p>
+        </div>
+        <div class="feature-grid">
+            <article class="feature-card"><span class="feature-icon">◫</span><h3>Painel em tempo real</h3><p>Acompanhe entradas, saídas e indicadores essenciais sem perder o contexto.</p></article>
+            <article class="feature-card"><span class="feature-icon">◎</span><h3>Equipes organizadas</h3><p>Convide pessoas, distribua responsabilidades e mantenha sua organização alinhada.</p></article>
+            <article class="feature-card"><span class="feature-icon">↗</span><h3>Histórico completo</h3><p>Consulte movimentações e atividades para entender cada mudança no negócio.</p></article>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section" id="contato">
+    <div class="container cta-card">
+        <div><span class="eyebrow eyebrow-light">Uma nova rotina financeira</span><h2>Clareza para crescer com confiança.</h2></div>
+        <a class="button button-light" href="mailto:contato@vaulta.local">Converse com nosso time</a>
+    </div>
+</section>
+{% endblock %}

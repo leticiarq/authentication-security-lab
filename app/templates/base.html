@@ -1,0 +1,52 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Vaulta — clareza financeira para empresas em movimento.">
+    <title>{% block title %}Vaulta{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'core/css/app.css' %}">
+    <script src="{% static 'core/js/app.js' %}" defer></script>
+</head>
+<body>
+    <header class="site-header">
+        <nav class="nav container" aria-label="Navegação principal">
+            <a class="brand" href="{% url 'home' %}" aria-label="Vaulta, página inicial">
+                <span class="brand-mark" aria-hidden="true"><span></span></span>
+                <span>vaulta</span>
+            </a>
+            <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-links">
+                <span class="sr-only">Abrir menu</span>
+                <span></span><span></span><span></span>
+            </button>
+            <div class="nav-links" id="nav-links">
+                <a href="{% url 'home' %}#recursos">Produto</a>
+                <a href="{% url 'about' %}">Sobre</a>
+                <a href="{% url 'help' %}">Ajuda</a>
+                <a class="button button-small" href="{% url 'home' %}#contato">Falar com a Vaulta</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>{% block content %}{% endblock %}</main>
+
+    <footer class="site-footer">
+        <div class="container footer-grid">
+            <div>
+                <a class="brand brand-light" href="{% url 'home' %}">
+                    <span class="brand-mark" aria-hidden="true"><span></span></span>
+                    <span>vaulta</span>
+                </a>
+                <p>Gestão financeira simples para decisões melhores.</p>
+            </div>
+            <div class="footer-links">
+                <a href="{% url 'about' %}">Sobre</a>
+                <a href="{% url 'help' %}">Central de ajuda</a>
+                <a href="{% url 'terms' %}">Termos de uso</a>
+            </div>
+            <p class="copyright">© {% now "Y" %} Vaulta Tecnologia Ltda.</p>
+        </div>
+    </footer>
+</body>
+</html>
