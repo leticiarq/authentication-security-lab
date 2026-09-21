@@ -5,14 +5,14 @@
 {% block content %}
 <section class="app-shell">
     <aside class="app-sidebar">
-        <div class="workspace-badge"><span>A</span><div><strong>Aurora Studio</strong><small>Plano Essencial</small></div></div>
+        <div class="workspace-badge"><span>{% if organization %}{{ organization.name|first|upper }}{% else %}P{% endif %}</span><div><strong>{% if organization %}{{ organization.name }}{% else %}Espaço pessoal{% endif %}</strong><small>{% if organization %}Plano {{ organization.get_plan_display }}{% else %}Sem organização{% endif %}</small></div></div>
         <nav aria-label="Navegação da conta">
             <a class="active" href="{% url 'authentication:dashboard' %}"><span>⌂</span> Visão geral</a>
             <a href="#"><span>↕</span> Movimentações</a>
             <a href="#"><span>▣</span> Contas</a>
             <a href="#"><span>◫</span> Relatórios</a>
             <p>Organização</p>
-            <a href="#"><span>♙</span> Equipe</a>
+            {% if organization %}<a href="{% url 'organizations:overview' %}"><span>♙</span> Equipe</a>{% else %}<a href="#"><span>♙</span> Equipe</a>{% endif %}
             <a href="#"><span>⚙</span> Configurações</a>
         </nav>
     </aside>

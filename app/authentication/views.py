@@ -116,7 +116,15 @@ def logout_view(request):
 
 @login_required
 def dashboard(request):
-    return render(request, "authentication/dashboard.html")
+    membership = request.user.memberships.select_related("organization").first()
+    return render(
+        request,
+        "authentication/dashboard.html",
+        {
+            "membership": membership,
+            "organization": membership.organization if membership else None,
+        },
+    )
 
 
 def password_recovery(request):

@@ -158,6 +158,8 @@ Endpoints que mudam estado usarão POST e CSRF, exceto onde o comportamento vuln
 3. usuário existente confirma o vínculo ou novo usuário passa pelo cadastro;
 4. aceite atômico cria `Membership` e consome o convite.
 
+Na primeira entrega de organizações, o aceite completo atende contas existentes: visitantes podem abrir o convite, entrar ou criar uma conta e então retornar ao link. A retomada automática do token durante cadastro será integrada quando o fluxo multi-stage de AUTH-12 for implementado.
+
 ## Autorização
 
 Views recebem decorators/mixins por capacidade: `login_required`, `organization_member_required`, `organization_admin_required` e `system_admin_required`. Templates podem esconder ações, mas nunca serão a fonte da autorização. Serviços sempre recebem o ator e a organização efetiva; IDs enviados pelo navegador não definem sozinhos o tenant.

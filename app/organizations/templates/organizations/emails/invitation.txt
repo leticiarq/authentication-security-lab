@@ -1,0 +1,11 @@
+Olá!
+
+Você foi convidado para participar de {{ invitation.organization.name }} na Vaulta como {{ invitation.get_role_display|lower }}.
+
+Abra o link abaixo usando a conta associada a {{ invitation.email }}:
+
+{{ invitation_url }}
+
+O convite fica disponível por sete dias.
+
+Equipe Vaulta

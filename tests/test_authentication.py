@@ -9,6 +9,7 @@ from django.urls import reverse
 from authentication.middleware import REMEMBER_COOKIE_NAME
 from authentication.models import LoginAttempt
 from authentication.services import check_credentials
+from organizations.models import Membership, Organization
 
 
 class AuthenticationFlowTests(TestCase):
@@ -201,4 +202,12 @@ class IntentionalDefaultCredentialCharacterizationTests(TestCase):
         users = get_user_model().objects.filter(email="demo@vaulta.local")
         self.assertEqual(users.count(), 1)
         self.assertTrue(users.get().check_password("vaulta-demo"))
+        organization = Organization.objects.get(slug="aurora-studio")
+        self.assertTrue(
+            Membership.objects.filter(
+                user=users.get(),
+                organization=organization,
+                role=Membership.Role.ADMIN,
+            ).exists()
+        )
         self.assertIn("Conta demo atualizada", output.getvalue())

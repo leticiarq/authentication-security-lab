@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Convite para {{ invitation.organization.name }} — Vaulta{% endblock %}
+
+{% block content %}
+<section class="result-page">
+    <div class="result-card">
+        <span class="result-icon" aria-hidden="true">♙</span>
+        <span class="eyebrow">Convite para sua equipe</span>
+        <h1>{{ invitation.organization.name }}</h1>
+        <p>Você foi convidado como <strong>{{ invitation.get_role_display|lower }}</strong>. O convite está associado a {{ invitation.email }}.</p>
+        {% if user.is_authenticated %}
+            <form method="post">{% csrf_token %}<button class="button" type="submit">Aceitar convite</button></form>
+        {% else %}
+            <a class="button" href="{% url 'authentication:login' %}?next={{ request.path|urlencode }}">Entrar para aceitar</a>
+            <p class="form-footnote">Ainda não tem acesso? <a href="{% url 'accounts:register' %}">Crie sua conta</a>.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

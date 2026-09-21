@@ -18,7 +18,7 @@ Não há comportamento vulnerável de autenticação nesta fase.
 
 ## Fase 2 — Contas e organizações
 
-Estado: em andamento; cadastro e verificação local implementados em `feat/user-registration`.
+Estado: cadastro e verificação local implementados em `feat/user-registration`; organizações, memberships contextuais, gestão de membros e convites para contas existentes implementados em `feat/organizations`.
 
 Branches sugeridos: `feat/user-registration`, `feat/organizations`.
 

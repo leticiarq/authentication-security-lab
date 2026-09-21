@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "accounts.apps.AccountsConfig",
     "authentication.apps.AuthenticationConfig",
+    "organizations.apps.OrganizationsConfig",
     "core.apps.CoreConfig",
 ]
 
