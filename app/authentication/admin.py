@@ -1,6 +1,13 @@
 from django.contrib import admin
 
-from .models import Device, LoginAttempt, LoginSession, PasswordResetRequest
+from .models import (
+    Device,
+    LoginAttempt,
+    LoginSession,
+    MFAProfile,
+    PasswordResetRequest,
+    RecoveryCode,
+)
 
 
 @admin.register(LoginAttempt)
@@ -51,3 +58,17 @@ class LoginSessionAdmin(admin.ModelAdmin):
     list_display = ("user", "device", "created_ip", "created_at", "last_seen_at", "revoked_at")
     list_filter = ("created_at", "revoked_at")
     search_fields = ("user__email", "django_session_key", "created_ip")
+
+
+class RecoveryCodeInline(admin.TabularInline):
+    model = RecoveryCode
+    extra = 0
+    readonly_fields = ("code_digest", "used_at", "created_at")
+
+
+@admin.register(MFAProfile)
+class MFAProfileAdmin(admin.ModelAdmin):
+    list_display = ("user", "enabled_at", "created_at")
+    search_fields = ("user__email",)
+    exclude = ("secret",)
+    inlines = (RecoveryCodeInline,)

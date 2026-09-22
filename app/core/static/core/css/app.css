@@ -270,6 +270,22 @@ h2 { font-size: clamp(2rem, 4vw, 3.25rem); line-height: 1.12; }
 .status-dot.success::before { background: #2eb67d; }
 .status-dot.failure { color: #a9233f; }
 .status-dot.failure::before { background: #d95670; }
+.mfa-setup-grid, .mfa-actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.mfa-setup-grid h2, .mfa-actions-grid h2, .mfa-status h2, .recovery-banner h2 { font-size: 1.15rem; }
+.mfa-setup-grid p, .mfa-actions-grid p, .mfa-status p, .recovery-banner p { font-size: .8rem; }
+.step-number { display: inline-block; margin-bottom: 20px; color: var(--violet); font-size: .72rem; font-weight: 800; }
+.secret-code { display: block; margin: 22px 0; padding: 15px; overflow-wrap: anywhere; color: var(--violet-dark); background: var(--violet-soft); border-radius: 9px; font-size: 1rem; letter-spacing: .12em; text-align: center; }
+.mfa-setup-grid details { color: var(--muted); font-size: .75rem; }
+.uri-code { display: block; margin-top: 10px; overflow-wrap: anywhere; font-size: .66rem; }
+.mfa-status { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.mfa-status > div { display: flex; align-items: center; gap: 15px; }
+.mfa-status p { margin: 4px 0 0; }
+.enabled-pill { padding: 7px 11px; color: var(--mint-dark); background: #dff8ee; border-radius: 30px; font-size: .72rem; font-weight: 800; }
+.mfa-actions-grid { margin-top: 20px; }
+.recovery-banner { margin-bottom: 20px; padding: 26px; color: white; background: var(--navy); border-radius: 17px; }
+.recovery-banner p { color: #c2c9d3; }
+.recovery-codes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; margin-top: 18px; }
+.recovery-codes code { padding: 10px; color: var(--navy); background: var(--mint); border-radius: 7px; text-align: center; }
 
 .site-footer { padding: 60px 0; color: white; background: #111a27; }
 .brand-light .brand-mark { border-color: var(--mint); }
@@ -299,6 +315,8 @@ h2 { font-size: clamp(2rem, 4vw, 3.25rem); line-height: 1.12; }
   .metric-grid, .dashboard-grid { grid-template-columns: 1fr; }
   .org-layout { grid-template-columns: 1fr; }
   .device-grid { grid-template-columns: 1fr; }
+  .mfa-setup-grid, .mfa-actions-grid { grid-template-columns: 1fr; }
+  .recovery-codes { grid-template-columns: repeat(2, 1fr); }
   .history-table { overflow-x: auto; }
   .history-head, .history-row { min-width: 670px; }
 }

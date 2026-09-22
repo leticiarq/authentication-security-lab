@@ -102,3 +102,32 @@ class LoginSession(models.Model):
 
     class Meta:
         ordering = ("-last_seen_at",)
+
+
+class MFAProfile(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="mfa_profile",
+    )
+    secret = models.CharField(max_length=64)
+    enabled_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def is_enabled(self):
+        return self.enabled_at is not None
+
+
+class RecoveryCode(models.Model):
+    mfa_profile = models.ForeignKey(
+        MFAProfile,
+        on_delete=models.CASCADE,
+        related_name="recovery_codes",
+    )
+    code_digest = models.CharField(max_length=64)
+    used_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("created_at",)

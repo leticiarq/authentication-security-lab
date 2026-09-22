@@ -50,3 +50,23 @@ class SetNewPasswordForm(forms.Form):
         if password and confirmation and password != confirmation:
             self.add_error("password_confirmation", "As senhas não coincidem.")
         return cleaned_data
+
+
+class MFACodeForm(forms.Form):
+    code = forms.CharField(
+        label="Código de verificação",
+        max_length=16,
+        widget=forms.TextInput(
+            attrs={"autocomplete": "one-time-code", "inputmode": "numeric", "autofocus": True}
+        ),
+    )
+    trust_device = forms.BooleanField(label="Confiar neste dispositivo", required=False)
+
+
+class MFASetupForm(forms.Form):
+    code = forms.CharField(
+        label="Código do aplicativo",
+        min_length=6,
+        max_length=6,
+        widget=forms.TextInput(attrs={"autocomplete": "one-time-code", "inputmode": "numeric"}),
+    )

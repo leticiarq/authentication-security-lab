@@ -1,6 +1,8 @@
 import time
+from datetime import timedelta
 
 from django.contrib.auth import get_user_model, login, logout
+from django.contrib.auth import BACKEND_SESSION_KEY, HASH_SESSION_KEY, SESSION_KEY
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
@@ -10,16 +12,26 @@ from django.utils.encoding import force_str
 from django.utils.http import url_has_allowed_host_and_scheme, urlsafe_base64_decode
 from django.views.decorators.http import require_POST
 
-from .forms import LoginForm, PasswordRecoveryRequestForm, SetNewPasswordForm
+from .forms import (
+    LoginForm,
+    MFACodeForm,
+    MFASetupForm,
+    PasswordRecoveryRequestForm,
+    SetNewPasswordForm,
+)
 from .middleware import REMEMBER_COOKIE_NAME
-from .models import LoginAttempt, LoginSession, PasswordResetRequest
+from .models import LoginAttempt, LoginSession, MFAProfile, PasswordResetRequest
 from .services import (
     AuthenticationResult,
     check_credentials,
+    consume_recovery_code,
     create_password_reset,
+    generate_recovery_codes,
     record_attempt,
     register_authenticated_session,
+    trusted_device_from_request,
 )
+from .totp import generate_secret, provisioning_uri, verify_code
 
 
 FAILURE_LIMIT = 5
@@ -72,6 +84,16 @@ def login_view(request):
                 if result.succeeded:
                     request.session.pop("login_failures", None)
                     request.session.pop("login_locked_until", None)
+                    mfa_profile = MFAProfile.objects.filter(
+                        user=result.user,
+                        enabled_at__isnull=False,
+                    ).first()
+                    if mfa_profile and not trusted_device_from_request(request, result.user):
+                        request.session["pending_auth_user_id"] = str(result.user.pk)
+                        request.session["password_verified"] = True
+                        request.session["pending_remember_me"] = form.cleaned_data["remember_me"]
+                        request.session["pending_next"] = next_url
+                        return redirect("authentication:mfa-challenge")
                     login(
                         request,
                         result.user,
@@ -135,6 +157,126 @@ def dashboard(request):
             "organization": membership.organization if membership else None,
         },
     )
+
+
+def _complete_multistage_login(request, user):
+    """Complete the MFA transition while preserving the pre-auth session.
+
+    INTENTIONAL LAB BEHAVIOR (AUTH-08): Django's login() rotates the session
+    key. This compatibility helper writes the authentication keys directly so
+    wizard state survives, leaving the identifier fixed across authentication.
+    """
+    request.session[SESSION_KEY] = str(user.pk)
+    request.session[BACKEND_SESSION_KEY] = "django.contrib.auth.backends.ModelBackend"
+    request.session[HASH_SESSION_KEY] = user.get_session_auth_hash()
+    request.user = user
+
+
+def mfa_challenge(request):
+    user_id = request.session.get("pending_auth_user_id")
+    if not user_id or not request.session.get("password_verified"):
+        return redirect("authentication:login")
+    user = get_object_or_404(User, pk=user_id, is_active=True)
+    profile = get_object_or_404(MFAProfile, user=user, enabled_at__isnull=False)
+
+    if request.method == "POST":
+        form = MFACodeForm(request.POST)
+        if form.is_valid():
+            code = form.cleaned_data["code"]
+            if verify_code(profile.secret, code) or consume_recovery_code(profile, code):
+                next_url = request.session.get("pending_next", reverse("authentication:dashboard"))
+                remember_me = request.session.get("pending_remember_me", False)
+                for key in (
+                    "pending_auth_user_id",
+                    "password_verified",
+                    "pending_remember_me",
+                    "pending_next",
+                ):
+                    request.session.pop(key, None)
+                _complete_multistage_login(request, user)
+                if remember_me:
+                    request.session.set_expiry(REMEMBER_SECONDS)
+                else:
+                    request.session.set_expiry(0)
+                login_session = register_authenticated_session(request, user)
+                response = redirect(next_url)
+                if form.cleaned_data["trust_device"] and login_session.device:
+                    login_session.device.trusted_until = timezone.now() + timedelta(days=30)
+                    login_session.device.save(update_fields=["trusted_until"])
+                    response.set_cookie(
+                        "vaulta_trusted_device",
+                        str(login_session.device_id),
+                        max_age=REMEMBER_SECONDS,
+                        httponly=True,
+                        samesite="Lax",
+                    )
+                return response
+            form.add_error("code", "O código informado não é válido.")
+    else:
+        form = MFACodeForm()
+    return render(request, "authentication/mfa/challenge.html", {"form": form})
+
+
+@login_required
+def security_settings(request):
+    profile = MFAProfile.objects.filter(user=request.user).first()
+    recovery_codes = request.session.pop("new_recovery_codes", None)
+    return render(
+        request,
+        "authentication/mfa/security_settings.html",
+        {"mfa_profile": profile, "recovery_codes": recovery_codes},
+    )
+
+
+@login_required
+def mfa_setup(request):
+    profile, _ = MFAProfile.objects.get_or_create(
+        user=request.user,
+        defaults={"secret": generate_secret()},
+    )
+    if profile.is_enabled:
+        return redirect("authentication:security-settings")
+    if request.method == "POST":
+        form = MFASetupForm(request.POST)
+        if form.is_valid() and verify_code(profile.secret, form.cleaned_data["code"]):
+            profile.enabled_at = timezone.now()
+            profile.save(update_fields=["enabled_at"])
+            request.session["new_recovery_codes"] = generate_recovery_codes(profile)
+            return redirect("authentication:security-settings")
+        if form.is_valid():
+            form.add_error("code", "O código informado não é válido.")
+    else:
+        form = MFASetupForm()
+    return render(
+        request,
+        "authentication/mfa/setup.html",
+        {
+            "form": form,
+            "secret": profile.secret,
+            "provisioning_uri": provisioning_uri(profile.secret, request.user.email),
+        },
+    )
+
+
+@require_POST
+@login_required
+def regenerate_recovery_codes(request):
+    profile = get_object_or_404(MFAProfile, user=request.user, enabled_at__isnull=False)
+    code = request.POST.get("code", "")
+    if not verify_code(profile.secret, code):
+        return redirect("authentication:security-settings")
+    request.session["new_recovery_codes"] = generate_recovery_codes(profile)
+    return redirect("authentication:security-settings")
+
+
+@require_POST
+@login_required
+def disable_mfa(request):
+    profile = get_object_or_404(MFAProfile, user=request.user, enabled_at__isnull=False)
+    if verify_code(profile.secret, request.POST.get("code", "")):
+        profile.delete()
+        request.user.devices.update(trusted_until=None)
+    return redirect("authentication:security-settings")
 
 
 @login_required

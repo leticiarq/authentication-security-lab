@@ -1,6 +1,7 @@
 import hashlib
 import ipaddress
 import random
+import secrets
 import time
 from dataclasses import dataclass
 from datetime import timedelta
@@ -14,7 +15,7 @@ from django.utils import timezone
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
-from .models import Device, LoginAttempt, LoginSession, PasswordResetRequest
+from .models import Device, LoginAttempt, LoginSession, PasswordResetRequest, RecoveryCode
 
 
 User = get_user_model()
@@ -169,3 +170,46 @@ def register_authenticated_session(request, user) -> LoginSession:
         },
     )
     return session
+
+
+def generate_recovery_codes(mfa_profile, amount=8) -> list[str]:
+    mfa_profile.recovery_codes.all().delete()
+    plain_codes = [secrets.token_hex(5).upper() for _ in range(amount)]
+    RecoveryCode.objects.bulk_create(
+        [
+            RecoveryCode(
+                mfa_profile=mfa_profile,
+                code_digest=hashlib.sha256(code.encode()).hexdigest(),
+            )
+            for code in plain_codes
+        ]
+    )
+    return plain_codes
+
+
+def consume_recovery_code(mfa_profile, candidate: str) -> bool:
+    digest = hashlib.sha256(candidate.replace(" ", "").upper().encode()).hexdigest()
+    recovery_code = mfa_profile.recovery_codes.filter(
+        code_digest=digest,
+        used_at__isnull=True,
+    ).first()
+    if not recovery_code:
+        return False
+    recovery_code.used_at = timezone.now()
+    recovery_code.save(update_fields=["used_at"])
+    return True
+
+
+def trusted_device_from_request(request, user):
+    device_id = request.COOKIES.get("vaulta_trusted_device")
+    if not device_id:
+        return None
+
+    # INTENTIONAL LAB BEHAVIOR (AUTH-11): this lookup verifies that a trusted
+    # device exists, but fails to bind it to the user whose password was just
+    # checked. A trusted device belonging to another account is accepted.
+    return Device.objects.filter(
+        pk=device_id,
+        trusted_until__gt=timezone.now(),
+        revoked_at__isnull=True,
+    ).first()

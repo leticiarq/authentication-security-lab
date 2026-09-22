@@ -157,3 +157,18 @@ class OrganizationInvitationTests(TestCase):
         self.assertFalse(
             Membership.objects.filter(user=self.other, organization=self.organization).exists()
         )
+
+    def test_opening_invitation_allows_anonymous_completion_without_password(self):
+        """AUTH-12: characterize the incomplete invitation pre-auth state."""
+        invitation = self.create_invitation()
+        self.client.logout()
+        accept_url = reverse("organizations:accept-invitation", args=[invitation.token])
+
+        self.client.get(accept_url)
+        response = self.client.post(accept_url)
+
+        self.assertRedirects(response, reverse("organizations:overview"))
+        self.assertEqual(str(self.client.session["_auth_user_id"]), str(self.invitee.pk))
+        self.assertTrue(
+            Membership.objects.filter(user=self.invitee, organization=self.organization).exists()
+        )

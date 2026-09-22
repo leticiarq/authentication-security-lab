@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Segurança da conta — Vaulta{% endblock %}
+{% block content %}
+<section class="workspace-page security-page"><div class="container security-container">
+    <div class="workspace-header"><div><span class="eyebrow">Configurações</span><h1>Segurança da conta</h1><p>Gerencie camadas adicionais de proteção para seu acesso.</p></div><a class="text-link" href="{% url 'authentication:dashboard' %}">← Voltar ao painel</a></div>
+    <nav class="security-tabs"><a class="active" href="{% url 'authentication:security-settings' %}">Proteção da conta</a><a href="{% url 'authentication:sessions' %}">Sessões</a><a href="{% url 'authentication:login-history' %}">Histórico de login</a></nav>
+    {% if recovery_codes %}<div class="recovery-banner"><h2>Salve seus códigos de recuperação</h2><p>Eles são exibidos somente agora. Guarde-os em um local seguro.</p><div class="recovery-codes">{% for code in recovery_codes %}<code>{{ code }}</code>{% endfor %}</div></div>{% endif %}
+    <div class="panel mfa-status"><div><span class="device-icon">⌁</span><div><h2>Verificação em duas etapas</h2><p>Use um aplicativo autenticador além da sua senha.</p></div></div>
+        {% if mfa_profile.is_enabled %}<span class="enabled-pill">Ativada</span>{% else %}<a class="button button-small" href="{% url 'authentication:mfa-setup' %}">Configurar</a>{% endif %}
+    </div>
+    {% if mfa_profile.is_enabled %}<div class="mfa-actions-grid"><div class="panel"><h2>Novos códigos de recuperação</h2><p>Confirme um código atual do aplicativo para substituir os anteriores.</p><form method="post" action="{% url 'authentication:regenerate-recovery-codes' %}">{% csrf_token %}<div class="field"><input name="code" maxlength="6" inputmode="numeric" required placeholder="000000"></div><button class="outline-button" type="submit">Gerar novos códigos</button></form></div>
+    <div class="panel"><h2>Desativar verificação</h2><p>Confirme um código atual para remover a proteção adicional.</p><form method="post" action="{% url 'authentication:disable-mfa' %}">{% csrf_token %}<div class="field"><input name="code" maxlength="6" inputmode="numeric" required placeholder="000000"></div><button class="danger-outline" type="submit">Desativar</button></form></div></div>{% endif %}
+</div></section>
+{% endblock %}

@@ -9,7 +9,7 @@
             <div><span class="eyebrow">Segurança da conta</span><h1>Sessões e dispositivos</h1><p>Revise onde sua conta está conectada.</p></div>
             <a class="text-link" href="{% url 'authentication:dashboard' %}">← Voltar ao painel</a>
         </div>
-        <nav class="security-tabs"><a class="active" href="{% url 'authentication:sessions' %}">Sessões</a><a href="{% url 'authentication:login-history' %}">Histórico de login</a></nav>
+        <nav class="security-tabs"><a href="{% url 'authentication:security-settings' %}">Proteção da conta</a><a class="active" href="{% url 'authentication:sessions' %}">Sessões</a><a href="{% url 'authentication:login-history' %}">Histórico de login</a></nav>
         <div class="panel security-panel">
             <div class="panel-title"><div><h2>Sessões ativas</h2><p>Acessos recentes associados à sua conta.</p></div>
                 <form method="post" action="{% url 'authentication:revoke-other-sessions' %}">{% csrf_token %}<button class="outline-button" type="submit">Encerrar outras sessões</button></form>

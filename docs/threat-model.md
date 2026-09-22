@@ -47,8 +47,11 @@ Este registro acompanha código deliberado; não substitui findings de pentest.
 | AUTH-10 | implementado na recuperação por e-mail | `feat/password-recovery` | `generate_password_reset_token` | `IntentionalPredictableTokenCharacterizationTests` |
 | AUTH-06 | implementado na configuração de sessão | `feat/session-management` | `config.settings.base` | `IntentionalCookieConfigurationCharacterizationTests` |
 | AUTH-07 | implementado na revogação de sessões | `feat/session-management` | `revoke_session` e `revoke_other_sessions` | `IntentionalSessionInvalidationCharacterizationTests` |
+| AUTH-08 | implementado na conclusão do desafio MFA | `feat/mfa` | `_complete_multistage_login` | `IntentionalSessionFixationCharacterizationTests` |
+| AUTH-11 | implementado em dispositivos confiáveis | `feat/mfa` | `trusted_device_from_request` | `IntentionalTrustedDeviceCharacterizationTests` |
+| AUTH-12 | implementado no aceite multi-stage de convite | `feat/mfa` | `organizations.views.accept_invitation` | `test_opening_invitation_allows_anonymous_completion_without_password` |
 
-Os demais cenários continuam apenas planejados. AUTH-01 está observável tanto no login quanto na solicitação de recuperação. AUTH-03 também se aplica ao formulário de nova senha. O caminho assistido de AUTH-09 permanece pendente até existirem dados organizacionais/financeiros coerentes para sua prova de identidade fraca.
+Os demais cenários continuam apenas planejados. AUTH-01 está observável tanto no login quanto na solicitação de recuperação. AUTH-03 também se aplica ao formulário de nova senha. O caminho assistido de AUTH-09 permanece pendente até existirem dados financeiros coerentes para sua prova de identidade fraca.
 
 ## Conflitos e separação dos cenários
 

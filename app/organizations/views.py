@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model, login
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
@@ -9,6 +10,9 @@ from .decorators import organization_member_required
 from .forms import InvitationForm
 from .models import Invitation, Membership
 from .services import create_invitation
+
+
+User = get_user_model()
 
 
 @organization_member_required()
@@ -61,9 +65,27 @@ def accept_invitation(request, token):
         accepted_at__isnull=True,
         expires_at__gt=timezone.now(),
     )
+    if request.method == "GET" and not request.user.is_authenticated:
+        invited_user = User.objects.filter(email=invitation.email, is_active=True).first()
+        if invited_user:
+            # The product keeps an identity candidate so a visitor can resume
+            # the invite flow after authentication.
+            request.session["invitation_preauth_user_id"] = str(invited_user.pk)
     if request.method == "POST":
         if not request.user.is_authenticated:
-            return redirect_to_login(request.get_full_path())
+            preauth_user_id = request.session.get("invitation_preauth_user_id")
+            if not preauth_user_id:
+                return redirect_to_login(request.get_full_path())
+
+            # INTENTIONAL LAB BEHAVIOR (AUTH-12): the final invitation stage
+            # trusts an identity candidate written when the link was opened,
+            # but never checks that the password stage actually completed.
+            preauth_user = get_object_or_404(User, pk=preauth_user_id, is_active=True)
+            login(
+                request,
+                preauth_user,
+                backend="django.contrib.auth.backends.ModelBackend",
+            )
         if request.user.email.lower() != invitation.email.lower():
             raise PermissionDenied
         with transaction.atomic():

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Verificação em duas etapas — Vaulta{% endblock %}
+{% block content %}
+<section class="result-page"><div class="result-card form-result-card">
+    <span class="result-icon" aria-hidden="true">⌁</span><span class="eyebrow">Verificação em duas etapas</span>
+    <h1>Confirme que é você</h1><p>Digite o código do seu aplicativo autenticador ou use um código de recuperação.</p>
+    <form method="post" class="left-form" novalidate>{% csrf_token %}
+        <div class="field"><label for="{{ form.code.id_for_label }}">{{ form.code.label }}</label>{{ form.code }}{% for error in form.code.errors %}<span class="field-error">{{ error }}</span>{% endfor %}</div>
+        <div class="checkbox-field">{{ form.trust_device }}<label for="{{ form.trust_device.id_for_label }}">{{ form.trust_device.label }} por 30 dias</label></div>
+        <button class="button button-block" type="submit">Verificar e continuar</button>
+    </form>
+</div></section>
+{% endblock %}
