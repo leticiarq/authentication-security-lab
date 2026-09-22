@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "accounts.apps.AccountsConfig",
     "authentication.apps.AuthenticationConfig",
     "organizations.apps.OrganizationsConfig",
+    "finance.apps.FinanceConfig",
     "core.apps.CoreConfig",
 ]
 

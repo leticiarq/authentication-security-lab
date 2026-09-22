@@ -10,6 +10,11 @@ urlpatterns = [
     path("entrar/verificacao/", views.mfa_challenge, name="mfa-challenge"),
     path("recuperar-acesso/", views.password_recovery, name="password-recovery"),
     path(
+        "recuperar-acesso/assistida/",
+        views.assisted_password_recovery,
+        name="assisted-password-recovery",
+    ),
+    path(
         "recuperar-acesso/enviado/",
         views.password_recovery_sent,
         name="password-recovery-sent",

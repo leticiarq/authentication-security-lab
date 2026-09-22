@@ -22,7 +22,7 @@ Fora de escopo: terceiros reais, engenharia social, indisponibilidade do host, d
 | AUTH-06 | Cookie de sessão inseguro | configuração de sessão | perfil vulnerável remove `HttpOnly` do cookie de sessão e mantém `Secure=False` para HTTP local | atributos do `Set-Cookie` e painel de armazenamento do navegador | baixa |
 | AUTH-07 | Invalidação imprópria de sessão | gerenciamento de sessões | revogação marca apenas o inventário `LoginSession`, sem apagar a linha correspondente de `django_session` ou impor `revoked_at` no middleware | sessão some da lista, mas o outro navegador continua funcional | baixa |
 | AUTH-08 | Session fixation | conclusão do login | serviço multiestágio grava as chaves de autenticação na sessão pré-login para preservar o wizard, sem rotacionar a chave como `django.contrib.auth.login()` faria | identificador de sessão permanece idêntico antes/depois da autenticação | média |
-| AUTH-09 | Recuperação de senha fraca | recuperação de conta | fluxo alternativo de suporte aceita e-mail mais informação financeira estática visível ao próprio tenant como prova suficiente | combinação de dados de baixa entropia permite avançar no fluxo local | média |
+| AUTH-09 | Recuperação de senha fraca | recuperação assistida | fluxo aceita e-mail, nome da organização e valor do lançamento mais recente — informação compartilhada com membros do tenant — como prova suficiente e entrega diretamente o reset | combinação de dados de baixa entropia permite redefinir a senha sem acesso ao e-mail | média |
 | AUTH-10 | Token de recuperação previsível | reset de senha | token numérico de seis dígitos deriva do UUID e de uma janela de um minuto por `random.Random`, gerador não criptográfico | mesma conta e minuto produzem o mesmo token; espaço de saída é pequeno | média/alta |
 | AUTH-11 | Falha de MFA | dispositivo confiável | cookie de dispositivo contém um identificador persistente não assinado; lookup verifica existência, mas não vincula o registro ao usuário pendente | alteração/reuso do cookie muda a exigência do segundo fator | alta |
 | AUTH-12 | Bypass de fluxo de autenticação | aceite de convite multi-stage | etapa final confia em `preauth_user_id` salvo quando o convite é aberto e não exige marcador de primeiro fator concluído | navegação direta e mudanças de estado permitem concluir uma transição incompleta | alta |
@@ -50,8 +50,9 @@ Este registro acompanha código deliberado; não substitui findings de pentest.
 | AUTH-08 | implementado na conclusão do desafio MFA | `feat/mfa` | `_complete_multistage_login` | `IntentionalSessionFixationCharacterizationTests` |
 | AUTH-11 | implementado em dispositivos confiáveis | `feat/mfa` | `trusted_device_from_request` | `IntentionalTrustedDeviceCharacterizationTests` |
 | AUTH-12 | implementado no aceite multi-stage de convite | `feat/mfa` | `organizations.views.accept_invitation` | `test_opening_invitation_allows_anonymous_completion_without_password` |
+| AUTH-09 | implementado na recuperação assistida | `feat/financial-dashboard` | `assisted_password_recovery` | `IntentionalAssistedRecoveryCharacterizationTests` |
 
-Os demais cenários continuam apenas planejados. AUTH-01 está observável tanto no login quanto na solicitação de recuperação. AUTH-03 também se aplica ao formulário de nova senha. O caminho assistido de AUTH-09 permanece pendente até existirem dados financeiros coerentes para sua prova de identidade fraca.
+Os demais cenários continuam apenas planejados. AUTH-01 está observável tanto no login quanto na solicitação de recuperação. AUTH-03 também se aplica ao formulário de nova senha.
 
 ## Conflitos e separação dos cenários
 

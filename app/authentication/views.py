@@ -8,11 +8,16 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.encoding import force_str
-from django.utils.http import url_has_allowed_host_and_scheme, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import (
+    url_has_allowed_host_and_scheme,
+    urlsafe_base64_decode,
+    urlsafe_base64_encode,
+)
 from django.views.decorators.http import require_POST
 
 from .forms import (
+    AssistedRecoveryForm,
     LoginForm,
     MFACodeForm,
     MFASetupForm,
@@ -32,6 +37,9 @@ from .services import (
     trusted_device_from_request,
 )
 from .totp import generate_secret, provisioning_uri, verify_code
+from finance.models import Transaction
+from finance.services import dashboard_summary
+from organizations.models import Membership
 
 
 FAILURE_LIMIT = 5
@@ -148,15 +156,7 @@ def logout_view(request):
 
 @login_required
 def dashboard(request):
-    membership = request.user.memberships.select_related("organization").first()
-    return render(
-        request,
-        "authentication/dashboard.html",
-        {
-            "membership": membership,
-            "organization": membership.organization if membership else None,
-        },
-    )
+    return render(request, "authentication/dashboard.html", dashboard_summary(request.user))
 
 
 def _complete_multistage_login(request, user):
@@ -347,6 +347,46 @@ def password_recovery_sent(request):
     if not email:
         return redirect("authentication:password-recovery")
     return render(request, "authentication/password_recovery_sent.html", {"email": email})
+
+
+def assisted_password_recovery(request):
+    if request.method == "POST":
+        form = AssistedRecoveryForm(request.POST)
+        if form.is_valid():
+            membership = (
+                Membership.objects.select_related("user", "organization")
+                .filter(
+                    user__email=form.cleaned_data["email"],
+                    organization__name__iexact=form.cleaned_data["organization_name"],
+                )
+                .first()
+            )
+            latest_transaction = None
+            if membership:
+                latest_transaction = (
+                    Transaction.objects.filter(account__organization=membership.organization)
+                    .order_by("-occurred_on", "-created_at")
+                    .first()
+                )
+            if (
+                latest_transaction
+                and latest_transaction.amount == form.cleaned_data["latest_transaction_amount"]
+            ):
+                # INTENTIONAL LAB BEHAVIOR (AUTH-09): organization name and a
+                # transaction value shared with every tenant member are treated
+                # as sufficient identity proof. The reset URL is handed directly
+                # to the requester instead of requiring mailbox access.
+                reset_request = create_password_reset(request, membership.user)
+                uidb64 = urlsafe_base64_encode(force_bytes(membership.user.pk))
+                return redirect(
+                    "authentication:password-reset",
+                    uidb64=uidb64,
+                    token=reset_request.token,
+                )
+            form.add_error(None, "Não foi possível validar os dados informados.")
+    else:
+        form = AssistedRecoveryForm()
+    return render(request, "authentication/assisted_recovery.html", {"form": form})
 
 
 def _password_reset_request(uidb64, token):

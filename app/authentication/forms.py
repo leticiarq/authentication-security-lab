@@ -70,3 +70,17 @@ class MFASetupForm(forms.Form):
         max_length=6,
         widget=forms.TextInput(attrs={"autocomplete": "one-time-code", "inputmode": "numeric"}),
     )
+
+
+class AssistedRecoveryForm(forms.Form):
+    email = forms.EmailField(label="E-mail da conta")
+    organization_name = forms.CharField(label="Nome da organização", max_length=140)
+    latest_transaction_amount = forms.DecimalField(
+        label="Valor do lançamento mais recente",
+        max_digits=12,
+        decimal_places=2,
+        min_value=0,
+    )
+
+    def clean_email(self):
+        return self.cleaned_data["email"].strip().lower()

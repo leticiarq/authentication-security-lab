@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load finance_extras %}
 
 {% block title %}Visão geral — Vaulta{% endblock %}
 
@@ -11,6 +12,7 @@
             <a href="#"><span>↕</span> Movimentações</a>
             <a href="#"><span>▣</span> Contas</a>
             <a href="#"><span>◫</span> Relatórios</a>
+            <a href="{% url 'finance:notifications' %}"><span>◉</span> Notificações</a>
             <p>Organização</p>
             {% if organization %}<a href="{% url 'organizations:overview' %}"><span>♙</span> Equipe</a>{% else %}<a href="#"><span>♙</span> Equipe</a>{% endif %}
             <a href="{% url 'authentication:security-settings' %}"><span>⚙</span> Segurança</a>
@@ -22,9 +24,9 @@
             <div class="profile-chip"><span>{{ user.get_short_name|first|upper }}</span><div><strong>{{ user.get_short_name }}</strong><small>{{ user.email }}</small></div></div>
         </header>
         <div class="metric-grid">
-            <article class="metric-card featured"><small>Saldo disponível</small><strong>R$ 184.720,00</strong><span>↗ 12,4% no período</span></article>
-            <article class="metric-card"><small>Receitas no mês</small><strong>R$ 42.850,00</strong><span class="up">↗ 8,2%</span></article>
-            <article class="metric-card"><small>Despesas no mês</small><strong>R$ 19.240,00</strong><span class="down">↘ 3,1%</span></article>
+            <article class="metric-card featured"><small>Saldo disponível</small><strong>R$ {{ balance|brl }}</strong><span>Consolidado da organização</span></article>
+            <article class="metric-card"><small>Receitas registradas</small><strong>R$ {{ income|brl }}</strong><span class="up">Entradas fictícias</span></article>
+            <article class="metric-card"><small>Despesas registradas</small><strong>R$ {{ expenses|brl }}</strong><span class="down">Saídas fictícias</span></article>
         </div>
         <div class="dashboard-grid">
             <article class="panel cashflow-panel">
@@ -34,9 +36,7 @@
             </article>
             <article class="panel activity-panel">
                 <div class="panel-title"><div><h2>Atividade recente</h2><p>Últimos lançamentos</p></div><a href="#">Ver todos</a></div>
-                <div class="activity-row"><span class="transaction-icon mint">↙</span><div><strong>Projeto Horizonte</strong><small>Recebimento · hoje</small></div><b class="up">+ R$ 8.400</b></div>
-                <div class="activity-row"><span class="transaction-icon purple">↗</span><div><strong>Infraestrutura Cloud</strong><small>Tecnologia · ontem</small></div><b>− R$ 1.280</b></div>
-                <div class="activity-row"><span class="transaction-icon amber">↗</span><div><strong>Espaço de trabalho</strong><small>Operacional · 18 set</small></div><b>− R$ 3.200</b></div>
+                {% for transaction in recent_transactions %}<div class="activity-row"><span class="transaction-icon {% if transaction.direction == 'income' %}mint{% else %}purple{% endif %}">{% if transaction.direction == 'income' %}↙{% else %}↗{% endif %}</span><div><strong>{{ transaction.description }}</strong><small>{{ transaction.category }} · {{ transaction.occurred_on|date:'d/m' }}</small></div><b class="{% if transaction.direction == 'income' %}up{% endif %}">{% if transaction.direction == 'income' %}+{% else %}−{% endif %} R$ {{ transaction.amount|brl }}</b></div>{% empty %}<p>Nenhum lançamento disponível.</p>{% endfor %}
             </article>
         </div>
     </div>

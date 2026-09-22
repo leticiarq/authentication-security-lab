@@ -59,6 +59,8 @@ Gate: testes com dois clientes independentes e relógio controlado; nenhum segre
 
 ## Fase 5 — Produto financeiro e administração
 
+Estado: contas, transações, dashboard, resumo JSON, notificações e dados fictícios implementados em `feat/financial-dashboard`; administração do sistema ainda pendente.
+
 Branches sugeridos: `feat/financial-dashboard`, `feat/administration`.
 
 - contas e transações fictícias;
