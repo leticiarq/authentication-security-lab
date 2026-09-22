@@ -16,6 +16,7 @@
             <p>Organização</p>
             {% if organization %}<a href="{% url 'organizations:overview' %}"><span>♙</span> Equipe</a>{% else %}<a href="#"><span>♙</span> Equipe</a>{% endif %}
             <a href="{% url 'authentication:security-settings' %}"><span>⚙</span> Segurança</a>
+            <a href="{% url 'accounts:profile' %}"><span>◎</span> Perfil</a>
         </nav>
     </aside>
     <div class="app-content">

@@ -1,11 +1,13 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, update_session_auth_hash
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import redirect, render
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.views.decorators.http import require_POST
 
-from .forms import RegistrationForm
+from .forms import AccountPasswordChangeForm, PreferenceForm, ProfileForm, RegistrationForm
+from .models import UserPreference
 from .services import send_verification_email
 
 
@@ -67,3 +69,33 @@ def verify_email(request, uidb64, token):
         {"verification_succeeded": valid},
         status=200 if valid else 400,
     )
+
+
+@login_required
+def profile(request):
+    form = ProfileForm(request.POST or None, instance=request.user)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        return redirect("accounts:profile")
+    return render(request, "accounts/profile.html", {"form": form})
+
+
+@login_required
+def preferences(request):
+    preference, _ = UserPreference.objects.get_or_create(user=request.user)
+    form = PreferenceForm(request.POST or None, instance=preference)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        return redirect("accounts:preferences")
+    return render(request, "accounts/preferences.html", {"form": form})
+
+
+@login_required
+def password_change(request):
+    form = AccountPasswordChangeForm(request.user, request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        request.user.set_password(form.cleaned_data["new_password"])
+        request.user.save(update_fields=["password", "updated_at"])
+        update_session_auth_hash(request, request.user)
+        return redirect("accounts:profile")
+    return render(request, "accounts/password_change.html", {"form": form})

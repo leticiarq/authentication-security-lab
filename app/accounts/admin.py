@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import User
+from .models import User, UserPreference
 
 
 @admin.register(User)
@@ -27,6 +27,12 @@ class VaultaUserAdmin(UserAdmin):
         ),
         ("Datas", {"fields": ("last_login", "date_joined")}),
     )
+
+
+@admin.register(UserPreference)
+class UserPreferenceAdmin(admin.ModelAdmin):
+    list_display = ("user", "locale", "timezone", "currency", "updated_at")
+    search_fields = ("user__email",)
     add_fieldsets = (
         (
             None,

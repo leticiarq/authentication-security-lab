@@ -1,3 +1,4 @@
+import hashlib
 from datetime import timedelta
 
 from django.contrib.auth import get_user_model
@@ -6,6 +7,7 @@ from django.utils import timezone
 
 from finance.models import FinancialAccount, Notification, Transaction
 from organizations.models import Membership, Organization
+from authentication.models import LegacyCredential
 
 
 class Command(BaseCommand):
@@ -105,6 +107,38 @@ class Command(BaseCommand):
                 title=title,
                 defaults={"kind": kind, "body": body},
             )
+
+        system_admin, _ = user_model.objects.get_or_create(
+            email="admin@vaulta.local",
+            defaults={"full_name": "Administração Vaulta"},
+        )
+        system_admin.full_name = "Administração Vaulta"
+        system_admin.role = user_model.Role.SYSTEM_ADMIN
+        system_admin.email_verified = True
+        system_admin.is_active = True
+        system_admin.set_password("vaulta-admin")
+        system_admin.save()
+
+        legacy_user, _ = user_model.objects.get_or_create(
+            email="legacy@vaulta.local",
+            defaults={"full_name": "Conta Legada", "email_verified": True},
+        )
+        legacy_user.full_name = "Conta Legada"
+        legacy_user.email_verified = True
+        legacy_user.is_active = True
+        legacy_user.set_unusable_password()
+        legacy_user.save()
+        LegacyCredential.objects.update_or_create(
+            user=legacy_user,
+            defaults={
+                # INTENTIONAL LAB BEHAVIOR (AUTH-05): unsalted SHA-1 for a
+                # fictitious legacy account. Never use this in production.
+                "legacy_digest": hashlib.sha1(
+                    b"welcome123",
+                    usedforsecurity=False,
+                ).hexdigest()
+            },
+        )
 
         action = "criada" if created else "atualizada"
         self.stdout.write(self.style.SUCCESS(f"Conta demo {action}: demo@vaulta.local"))

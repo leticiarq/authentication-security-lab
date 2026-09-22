@@ -13,4 +13,7 @@ urlpatterns = [
         views.verify_email,
         name="verify-email",
     ),
+    path("app/perfil/", views.profile, name="profile"),
+    path("app/perfil/senha/", views.password_change, name="password-change"),
+    path("app/preferencias/", views.preferences, name="preferences"),
 ]

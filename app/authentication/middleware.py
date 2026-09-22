@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model, login
 
+from .models import AuthenticationDiagnostic
 from .services import register_authenticated_session
 
 
@@ -27,3 +28,26 @@ class RememberMeMiddleware:
                     request.remembered_by_cookie = True
                     register_authenticated_session(request, user)
         return self.get_response(request)
+
+
+class AuthenticationTelemetryMiddleware:
+    observed_paths = (
+        "/entrar/",
+        "/recuperar-acesso/",
+        "/redefinir-senha/",
+    )
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        if request.method == "POST" and request.path.startswith(self.observed_paths):
+            # INTENTIONAL LAB BEHAVIOR (AUTH-14): diagnostic telemetry copies
+            # the raw POST payload without redacting password or token fields.
+            # It remains local, but credentials become visible to support users.
+            AuthenticationDiagnostic.objects.create(
+                request_path=request.path,
+                payload={key: values for key, values in request.POST.lists()},
+            )
+        return response

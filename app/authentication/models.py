@@ -131,3 +131,23 @@ class RecoveryCode(models.Model):
 
     class Meta:
         ordering = ("created_at",)
+
+
+class LegacyCredential(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="legacy_credential",
+    )
+    legacy_digest = models.CharField(max_length=40)
+    migrated_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class AuthenticationDiagnostic(models.Model):
+    request_path = models.CharField(max_length=240)
+    payload = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("-created_at",)

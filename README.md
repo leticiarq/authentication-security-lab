@@ -4,7 +4,7 @@ Vaulta is a fictional financial-management SaaS built as a local authentication 
 
 > **WARNING: This application is intentionally vulnerable. Run it only in an isolated/local environment. Do not expose it to the Internet.**
 
-The project foundation, registration, authentication, recovery, organizations, sessions, MFA/TOTP and a fictional financial dashboard are available. Intentional authentication behaviors are tracked only in the internal threat model and characterization tests.
+The project foundation, registration, authentication, recovery, organizations, sessions, MFA/TOTP, financial dashboard, account preferences and system administration are available. All 15 intentional scenarios are tracked only in the internal threat model and characterization tests.
 
 ## Quick start with Docker
 

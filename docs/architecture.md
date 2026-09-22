@@ -113,6 +113,7 @@ As URLs públicas usam nomes de produto e não denunciam cenários de laboratór
 | GET | `/controle/usuarios/` | system admin |
 | GET | `/controle/organizacoes/` | system admin |
 | POST | `/controle/usuarios/<id>/status/` | system admin |
+| GET | `/controle/suporte/diagnostico/` | system admin |
 | GET | `/api/v1/dashboard/summary/` | usuário autenticado; resposta JSON para widgets |
 
 Endpoints que mudam estado usarão POST e CSRF, exceto onde o comportamento vulnerável planejado exigir uma decisão específica e documentada.

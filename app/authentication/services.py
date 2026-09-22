@@ -1,4 +1,5 @@
 import hashlib
+import hmac
 import ipaddress
 import random
 import secrets
@@ -15,7 +16,14 @@ from django.utils import timezone
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
-from .models import Device, LoginAttempt, LoginSession, PasswordResetRequest, RecoveryCode
+from .models import (
+    Device,
+    LegacyCredential,
+    LoginAttempt,
+    LoginSession,
+    PasswordResetRequest,
+    RecoveryCode,
+)
 
 
 User = get_user_model()
@@ -44,7 +52,19 @@ def check_credentials(email: str, password: str) -> AuthenticationResult:
     except User.DoesNotExist:
         return AuthenticationResult(None, LoginAttempt.Reason.UNKNOWN_ACCOUNT)
 
-    if not user.check_password(password):
+    legacy_credential = LegacyCredential.objects.filter(user=user, migrated_at__isnull=True).first()
+    if legacy_credential:
+        # INTENTIONAL LAB BEHAVIOR (AUTH-05): this compatibility path stores and
+        # compares unsalted SHA-1 digests. It exists only for fictitious lab
+        # accounts and must NEVER be used for production password storage.
+        candidate_digest = hashlib.sha1(password.encode(), usedforsecurity=False).hexdigest()
+        password_matches = hmac.compare_digest(
+            candidate_digest,
+            legacy_credential.legacy_digest,
+        )
+    else:
+        password_matches = user.check_password(password)
+    if not password_matches:
         return AuthenticationResult(user, LoginAttempt.Reason.INVALID_PASSWORD)
     if not user.is_active:
         return AuthenticationResult(user, LoginAttempt.Reason.INACTIVE_ACCOUNT)

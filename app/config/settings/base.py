@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     "authentication.apps.AuthenticationConfig",
     "organizations.apps.OrganizationsConfig",
     "finance.apps.FinanceConfig",
+    "administration.apps.AdministrationConfig",
     "core.apps.CoreConfig",
 ]
 
@@ -39,6 +40,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "authentication.middleware.RememberMeMiddleware",
+    "authentication.middleware.AuthenticationTelemetryMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]

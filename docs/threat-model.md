@@ -27,7 +27,7 @@ Fora de escopo: terceiros reais, engenharia social, indisponibilidade do host, d
 | AUTH-11 | Falha de MFA | dispositivo confiável | cookie de dispositivo contém um identificador persistente não assinado; lookup verifica existência, mas não vincula o registro ao usuário pendente | alteração/reuso do cookie muda a exigência do segundo fator | alta |
 | AUTH-12 | Bypass de fluxo de autenticação | aceite de convite multi-stage | etapa final confia em `preauth_user_id` salvo quando o convite é aberto e não exige marcador de primeiro fator concluído | navegação direta e mudanças de estado permitem concluir uma transição incompleta | alta |
 | AUTH-13 | Problema em remember-me | login persistente | cookie contém UUID bruto do usuário, sem assinatura, segredo aleatório, rotação ou registro de revogação | valor é correlacionável, restaura login e permanece válido após troca de senha | média |
-| AUTH-14 | Exposição de credencial | telemetria de suporte local | middleware diagnóstico serializa payload de POST de autenticação sem redigir campos sensíveis em arquivo local incluído em bundle de suporte acessível a system admin | credenciais fictícias aparecem em logs/bundle dentro da instalação | média |
+| AUTH-14 | Exposição de credencial | telemetria de suporte local | middleware diagnóstico serializa payload de POST de autenticação no banco sem redigir campos sensíveis; eventos ficam acessíveis ao system admin | credenciais fictícias aparecem na tela interna de diagnóstico | média |
 | AUTH-15 | Credenciais padrão/demo | bootstrap de desenvolvimento | seed cria workspace de demonstração com senha documentada e conta habilitada com acesso regular | credencial publicada na documentação de desenvolvimento autentica sem troca obrigatória | baixa |
 
 AUTH-05 terá comentários de código explícitos e próximos ao modelo/backend afirmando que o mecanismo é inseguro, limitado a dados de laboratório e proibido em produção. Esses comentários não serão enviados ao HTML.
@@ -51,8 +51,10 @@ Este registro acompanha código deliberado; não substitui findings de pentest.
 | AUTH-11 | implementado em dispositivos confiáveis | `feat/mfa` | `trusted_device_from_request` | `IntentionalTrustedDeviceCharacterizationTests` |
 | AUTH-12 | implementado no aceite multi-stage de convite | `feat/mfa` | `organizations.views.accept_invitation` | `test_opening_invitation_allows_anonymous_completion_without_password` |
 | AUTH-09 | implementado na recuperação assistida | `feat/financial-dashboard` | `assisted_password_recovery` | `IntentionalAssistedRecoveryCharacterizationTests` |
+| AUTH-05 | implementado no fallback legado | `feat/administration` | `LegacyCredential` e `check_credentials` | `IntentionalLegacyCredentialCharacterizationTests` |
+| AUTH-14 | implementado na telemetria local | `feat/administration` | `AuthenticationTelemetryMiddleware` | `IntentionalCredentialExposureCharacterizationTests` |
 
-Os demais cenários continuam apenas planejados. AUTH-01 está observável tanto no login quanto na solicitação de recuperação. AUTH-03 também se aplica ao formulário de nova senha.
+Todos os 15 cenários planejados possuem agora uma implementação e um teste de caracterização. AUTH-01 está observável tanto no login quanto na solicitação de recuperação. AUTH-03 se aplica ao cadastro, à redefinição e à alteração autenticada de senha.
 
 ## Conflitos e separação dos cenários
 
@@ -86,7 +88,7 @@ AUTH-11 só ignora MFA depois de uma senha válida, por confiança indevida em d
 
 ### AUTH-14 × proibição de dados reais
 
-Somente credenciais das contas fictícias entram na demonstração. O log ficará em volume local ignorado pelo Git, terá limite de tamanho e aviso interno. O recurso não envia nada para fora do ambiente.
+Somente credenciais das contas fictícias devem entrar na demonstração. Os eventos ficam no PostgreSQL local, limitados na tela aos 100 mais recentes, e não são transmitidos para fora do ambiente.
 
 ## Padrões seguros do Django que serão alterados deliberadamente
 

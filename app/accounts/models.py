@@ -35,3 +35,14 @@ class User(AbstractUser):
 
     def get_short_name(self):
         return self.full_name.split()[0] if self.full_name else self.email.split("@", 1)[0]
+
+
+class UserPreference(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="preferences")
+    locale = models.CharField(max_length=12, default="pt-BR")
+    timezone = models.CharField(max_length=64, default="America/Recife")
+    currency = models.CharField(max_length=3, default="BRL")
+    notify_financial = models.BooleanField(default=True)
+    notify_security = models.BooleanField(default=True)
+    notify_team = models.BooleanField(default=True)
+    updated_at = models.DateTimeField(auto_now=True)
