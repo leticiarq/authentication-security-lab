@@ -35,9 +35,11 @@ See [docs/setup.md](docs/setup.md). PostgreSQL is the normal development databas
 ## Documentation
 
 - [Architecture](docs/architecture.md)
+- [Participant lab manual](docs/lab-guide.md)
 - [Setup and operations](docs/setup.md)
 - [Vulnerable release checklist](docs/release-checklist.md)
 - [Development accounts](docs/development-accounts.md)
+- [Synthetic exercise data](lab-data/README.md)
 - [Threat model and internal vulnerability matrix](docs/threat-model.md)
 - [Implementation phases](docs/implementation-plan.md)
 - [Vulnerability workspace](vulnerabilities/README.md)
