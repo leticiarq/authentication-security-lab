@@ -11,7 +11,6 @@ from .forms import InvitationForm
 from .models import Invitation, Membership
 from .services import create_invitation
 
-
 User = get_user_model()
 
 

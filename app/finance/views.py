@@ -34,8 +34,8 @@ class DashboardSummaryAPI(APIView):
         return Response(
             {
                 "organization": summary["organization"].name if summary["organization"] else None,
-                "balance": str(summary["balance"]),
-                "income": str(summary["income"]),
-                "expenses": str(summary["expenses"]),
+                "balance": f"{summary['balance']:.2f}",
+                "income": f"{summary['income']:.2f}",
+                "expenses": f"{summary['expenses']:.2f}",
             }
         )

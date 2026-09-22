@@ -4,9 +4,9 @@ from datetime import timedelta
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-
 from finance.models import FinancialAccount, Notification, Transaction
 from organizations.models import Membership, Organization
+
 from authentication.models import LegacyCredential
 
 
@@ -97,9 +97,21 @@ class Command(BaseCommand):
             )
 
         notification_rows = (
-            (Notification.Kind.FINANCE, "Recebimento confirmado", "O lançamento Projeto Horizonte foi conciliado."),
-            (Notification.Kind.TEAM, "Equipe atualizada", "Rafael Nunes faz parte da Aurora Studio."),
-            (Notification.Kind.SECURITY, "Novo acesso registrado", "Um novo navegador foi associado à sua conta."),
+            (
+                Notification.Kind.FINANCE,
+                "Recebimento confirmado",
+                "O lançamento Projeto Horizonte foi conciliado.",
+            ),
+            (
+                Notification.Kind.TEAM,
+                "Equipe atualizada",
+                "Rafael Nunes faz parte da Aurora Studio.",
+            ),
+            (
+                Notification.Kind.SECURITY,
+                "Novo acesso registrado",
+                "Um novo navegador foi associado à sua conta.",
+            ),
         )
         for kind, title, body in notification_rows:
             Notification.objects.get_or_create(

@@ -1,12 +1,11 @@
 from datetime import timedelta
 
+from authentication.models import Device, MFAProfile, RecoveryCode
+from authentication.totp import code_at, generate_secret, verify_code
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
-
-from authentication.models import Device, MFAProfile, RecoveryCode
-from authentication.totp import code_at, generate_secret, verify_code
 
 
 class TOTPTests(TestCase):

@@ -1,9 +1,8 @@
 from functools import wraps
 
+from accounts.models import User
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied
-
-from accounts.models import User
 
 
 def system_admin_required(view_func):

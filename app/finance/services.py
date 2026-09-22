@@ -19,8 +19,18 @@ def dashboard_summary(user):
     organization = membership.organization
     accounts = FinancialAccount.objects.filter(organization=organization)
     transactions = Transaction.objects.filter(account__organization=organization)
-    income = transactions.filter(direction=Transaction.Direction.INCOME).aggregate(total=Sum("amount"))["total"] or Decimal("0")
-    expenses = transactions.filter(direction=Transaction.Direction.EXPENSE).aggregate(total=Sum("amount"))["total"] or Decimal("0")
+    income = (
+        transactions.filter(direction=Transaction.Direction.INCOME).aggregate(total=Sum("amount"))[
+            "total"
+        ]
+        or Decimal("0")
+    )
+    expenses = (
+        transactions.filter(direction=Transaction.Direction.EXPENSE).aggregate(total=Sum("amount"))[
+            "total"
+        ]
+        or Decimal("0")
+    )
     return {
         "membership": membership,
         "organization": organization,

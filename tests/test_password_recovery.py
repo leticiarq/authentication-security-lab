@@ -1,6 +1,8 @@
 from datetime import timedelta
 from urllib.parse import urlsplit
 
+from authentication.models import PasswordResetRequest
+from authentication.services import generate_password_reset_token
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.test import TestCase
@@ -8,9 +10,6 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
-
-from authentication.models import PasswordResetRequest
-from authentication.services import generate_password_reset_token
 
 
 class PasswordRecoveryFlowTests(TestCase):

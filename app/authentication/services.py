@@ -25,7 +25,6 @@ from .models import (
     RecoveryCode,
 )
 
-
 User = get_user_model()
 
 
@@ -75,7 +74,11 @@ def check_credentials(email: str, password: str) -> AuthenticationResult:
 
 def client_ip(request) -> str | None:
     forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR", "")
-    value = forwarded_for.split(",", 1)[0].strip() if forwarded_for else request.META.get("REMOTE_ADDR")
+    value = (
+        forwarded_for.split(",", 1)[0].strip()
+        if forwarded_for
+        else request.META.get("REMOTE_ADDR")
+    )
     if not value:
         return None
     try:

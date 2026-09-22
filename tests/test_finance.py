@@ -1,14 +1,13 @@
 from datetime import timedelta
 from decimal import Decimal
 
+from authentication.models import PasswordResetRequest
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
-
-from authentication.models import PasswordResetRequest
 from finance.models import FinancialAccount, Notification, Transaction
 from organizations.models import Membership, Organization
 
@@ -66,9 +65,9 @@ class FinancialDashboardTests(TestCase):
             response.json(),
             {
                 "organization": "Orion",
-                "balance": "15000",
-                "income": "2500",
-                "expenses": "800",
+                "balance": "15000.00",
+                "income": "2500.00",
+                "expenses": "800.00",
             },
         )
         self.client.logout()

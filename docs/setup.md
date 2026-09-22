@@ -42,14 +42,23 @@ python manage.py runserver 127.0.0.1:8000
 
 ## Testes
 
-Os testes usam settings isolados e banco SQLite em memória:
+Os testes rápidos usam settings isolados e banco SQLite em memória:
 
 ```bash
 cd app
 DJANGO_SETTINGS_MODULE=config.settings.test python manage.py test ../tests
 ```
 
-Testes de integração com PostgreSQL serão adicionados junto aos modelos transacionais. Testes que caracterizam uma vulnerabilidade deverão explicar o comportamento esperado da versão vulnerável sem expor a falha na interface do produto.
+Antes de preparar a versão vulnerável, execute a suíte completa em PostgreSQL e os
+demais gates com:
+
+```bash
+./scripts/release-check.sh
+```
+
+O processo está detalhado em [release-checklist.md](release-checklist.md). Testes que
+caracterizam uma vulnerabilidade explicam o comportamento esperado no código, sem
+expor a falha na interface do produto.
 
 ## Segredos e dados
 

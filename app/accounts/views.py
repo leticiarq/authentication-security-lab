@@ -10,7 +10,6 @@ from .forms import AccountPasswordChangeForm, PreferenceForm, ProfileForm, Regis
 from .models import UserPreference
 from .services import send_verification_email
 
-
 User = get_user_model()
 
 

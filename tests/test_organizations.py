@@ -3,7 +3,6 @@ from django.core import mail
 from django.db import IntegrityError, transaction
 from django.test import TestCase
 from django.urls import reverse
-
 from organizations.models import Invitation, Membership, Organization
 
 

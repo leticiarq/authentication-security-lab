@@ -1,8 +1,14 @@
 import time
 from datetime import timedelta
 
-from django.contrib.auth import get_user_model, login, logout
-from django.contrib.auth import BACKEND_SESSION_KEY, HASH_SESSION_KEY, SESSION_KEY
+from django.contrib.auth import (
+    BACKEND_SESSION_KEY,
+    HASH_SESSION_KEY,
+    SESSION_KEY,
+    get_user_model,
+    login,
+    logout,
+)
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
@@ -15,6 +21,9 @@ from django.utils.http import (
     urlsafe_base64_encode,
 )
 from django.views.decorators.http import require_POST
+from finance.models import Transaction
+from finance.services import dashboard_summary
+from organizations.models import Membership
 
 from .forms import (
     AssistedRecoveryForm,
@@ -37,10 +46,6 @@ from .services import (
     trusted_device_from_request,
 )
 from .totp import generate_secret, provisioning_uri, verify_code
-from finance.models import Transaction
-from finance.services import dashboard_summary
-from organizations.models import Membership
-
 
 FAILURE_LIMIT = 5
 LOCK_SECONDS = 60

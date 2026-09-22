@@ -1,5 +1,9 @@
 # Scripts
 
-Espaço reservado para comandos idempotentes de bootstrap, seed e manutenção do laboratório. Scripts de teste deverão recusar hosts que não sejam loopback ou o serviço Docker local.
+Os scripts deste diretório automatizam tarefas locais, idempotentes e limitadas ao
+laboratório. Eles não devem operar contra hosts públicos.
 
-Nenhum script de exploração é necessário na Fase 1.
+- `release-check.sh`: valida lint, migrations, testes em PostgreSQL, seed e health
+  check usando um projeto Docker Compose temporário.
+
+Nenhum script de exploração faz parte desta versão.

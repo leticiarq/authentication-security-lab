@@ -3,7 +3,6 @@ from django.contrib.auth import get_user_model, login
 from .models import AuthenticationDiagnostic
 from .services import register_authenticated_session
 
-
 REMEMBER_COOKIE_NAME = "vaulta_remember"
 
 

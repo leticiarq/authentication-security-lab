@@ -1,11 +1,10 @@
 import hashlib
 
+from accounts.models import UserPreference
+from authentication.models import AuthenticationDiagnostic, LegacyCredential
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
-
-from accounts.models import UserPreference
-from authentication.models import AuthenticationDiagnostic, LegacyCredential
 from organizations.models import Organization
 
 

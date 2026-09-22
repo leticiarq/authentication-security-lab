@@ -1,14 +1,13 @@
 from io import StringIO
 from unittest.mock import patch
 
+from authentication.middleware import REMEMBER_COOKIE_NAME
+from authentication.models import LoginAttempt
+from authentication.services import check_credentials
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.test import Client, TestCase
 from django.urls import reverse
-
-from authentication.middleware import REMEMBER_COOKIE_NAME
-from authentication.models import LoginAttempt
-from authentication.services import check_credentials
 from organizations.models import Membership, Organization
 
 

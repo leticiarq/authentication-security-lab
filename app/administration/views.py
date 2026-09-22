@@ -1,13 +1,11 @@
+from authentication.models import AuthenticationDiagnostic, LoginAttempt
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
-
-from authentication.models import AuthenticationDiagnostic, LoginAttempt
 from organizations.models import Organization
 
 from .decorators import system_admin_required
-
 
 User = get_user_model()
 
